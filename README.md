@@ -38,12 +38,16 @@ deployment on the grid:
 mkdir -p ~/tap-sessions
 git clone git@github.com:unified-systems-com/tap.git ~/tap-sessions/main
 cd ~/tap-sessions/main
-scripts/spawn-session.sh sam samsite
+scripts/spawn-session.sh sam --from git+https://github.com/unified-systems-com/tap-plugin-samsite@main#samsite
 ```
 
-The spawn script checks your host itself (toolchain, layout — it tells you the
-fix for anything missing), pulls the published images (no local compile), and
-boots the `samsite` profile. **You do not need to get the credential setup right
+The boot profile ships **inside this plugin** as an in-package boot record — the
+`--from` pointer fetches it straight from this repository, so the tap clone
+carries nothing samsite-specific. `@main` floats with this repo's latest;
+substitute a release tag (`@v0.2.0`) to pin a reproducible standup. The spawn
+script checks your host itself (toolchain, layout — it tells you the fix for
+anything missing), pulls the published images (no local compile), and boots the
+record. **You do not need to get the credential setup right
 before running it**: the profile *declares* every secret it requires
 (`required_secrets`), and the boot preflight checks the declarations in seconds —
 before anything expensive runs — naming exactly what is missing, what kind it
@@ -58,12 +62,6 @@ When something fails, the evidence is durable: `logs/boot/latest.boot-record.jso
 in the session worktree records which check failed and why — a *missing* secret
 (provision it) reads differently from a *present-but-dead* one (rotate it) — and
 the `/diagnose-failed-session-spawn` skill reads that record first.
-
-> **Coming change:** this profile is moving out of the tap repo and into this
-> plugin as an in-package boot record, after which the spawn takes a `--from`
-> pointer at this repo and the tap clone needs no samsite-specific content. The
-> commands above are current until that lands; this README will carry the
-> pointer form when it does.
 
 ## Before you boot: the configuration checklist
 
