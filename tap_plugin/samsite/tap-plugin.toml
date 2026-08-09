@@ -33,3 +33,15 @@ kev-fetch = "grift/kev-fetch.grift.json"
 users = "grift/users.grift.json"
 samsite-collector-schedule = "grift/samsite-collector-schedule.grift.json"
 aws-collector-schedule = "grift/aws-collector-schedule.grift.json"
+
+# In-package boot records (req-boot-bootstrap-records-in-package / -discovery). Digests are
+# canonical sha256 (sorted keys, tight separators) — regenerate with
+# `scripts/boot-record-hash --refresh` in a checkout core can see, or the shipped
+# test_boot_record_resolves suite's digest assertion; never hand-edit. There is deliberately
+# NO per-record version: the record's version is this plugin's (req-boot-bootstrap-record-version).
+# The samsite record is THE demo profile — fetched by pointer:
+#   spawn --from git+https://github.com/unified-systems-com/tap-plugin-samsite@<rev>#samsite
+[[boot.records]]
+name = "samsite"
+description = "Samsite demo end-to-end: full plugin set git-pinned + population (GRIFT seeds, then boto3/github/KSI/samsite-compliance collectors); required_secrets declared for preflight provisioning."
+sha256 = "869a95f2be315d23384e7473b59589dede263a435efd59b6cf65fd87937608db"
