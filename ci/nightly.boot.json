@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "profile_kind": "dev_local",
+  "description": "Samsite CI/nightly boot-and-test profile (req-plugin-extdev-repo-ci; consumed by tap's plugin-ci.yml boot-and-test job and the nightly-plugins depth leg). Derived from the shipped samsite record: the SAME sibling closure at the SAME pins — the record test cold-resolves the shipped record, which references every seed slug and collector key, so the full set must be installed — but samsite itself installs EDITABLE from _external/samsite (the path plugin-ci.yml checks this repo out to inside the harness tree), so CI tests THIS repo's HEAD against the pinned siblings, not a released tag. Population is seed-only: CI runs with an empty secrets root and never fires collectors (the boot-and-test job boots to healthy; population does not run), so there are no fire-collector steps and correspondingly no required_secrets (coherence rule: entries must be consumed by an enabled step). Bump sibling pins here deliberately, in step with the shipped record.",
+  "install": {
+    "plugins": [
+      {
+        "slug": "administrivia",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-administrivia",
+          "rev": "v0.1.0"
+        },
+        "note": "Package-mode (tap_plugin.administrivia). TAP admin pages + grid landing + cares administrivia; seeded in population."
+      },
+      {
+        "slug": "computing_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-computing-core",
+          "rev": "v0.3.0"
+        },
+        "note": "Package-mode (tap_plugin.computing_core). Vendor-neutral computing-primitive dimension; seeded in population. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "roscale",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-roscale",
+          "rev": "v0.2.0"
+        },
+        "note": "Package-mode (tap_plugin.roscale). Install-only: registers the OSCAL workbench panel types samsite consumes; no grift seed, no collector, but samsite imports it at ready() — must be installed. Git-sourced from its own repo at v0.2.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "identity_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-identity-core",
+          "rev": "v0.1.0"
+        },
+        "note": "Package-mode (tap_plugin.identity_core). Install-only substrate: cross-cutting federated-identity vocabulary (the oidc_issuer convergence node + issuer primitives) + the generic TRUSTS_ISSUER edge. github_core imports its issuer helper; sigstore_core/samsite reference identity_core__oidc_issuer. No GRIFT population seed. Git-sourced from its own repo at v0.1.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "aws_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-aws-core",
+          "rev": "v0.4.0"
+        },
+        "note": "Package-mode (tap_plugin.aws_core). Tier-0 boto3 dep. AWS dimension + region reference data; seeded + fired in population. Git-sourced from its own repo at v0.4.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "sigstore_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-sigstore-core",
+          "rev": "v0.3.0"
+        },
+        "note": "Package-mode (tap_plugin.sigstore_core). Tier-0 sigstore dep. Install-only library: samsite compliance_collector consumes its verify/decompose helpers + models; IDENTITY_VOUCHED_BY targets identity_core__oidc_issuer. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "github_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-github-core",
+          "rev": "v0.3.0"
+        },
+        "note": "Package-mode (tap_plugin.github_core). Tier-0 PyYAML dep. AWS/GitHub Actions plumbing + the github collector; mints the oidc_issuer via identity_core and emits TRUSTS_ISSUER. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "compliance_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-compliance-core",
+          "rev": "v0.2.0"
+        },
+        "note": "Package-mode (tap_plugin.compliance_core). Install-only substrate: regime-agnostic compliance vocabulary (artifact/context/evidence/finding/exception/boundary). samsite's compliance_collector creates compliance_core__compliance_artifact nodes; fedramp_20x_ksi depends on it. No GRIFT population seed. Git-sourced from its own repo at v0.2.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "fedramp_20x_ksi",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-fedramp-20x-ksi",
+          "rev": "v0.3.0"
+        },
+        "note": "Package-mode (tap_plugin.fedramp_20x_ksi). FedRAMP 20x KSI dimension, catalog seed, compliance/profile pages, schedule; seeded + catalog fired in population. Depends on compliance_core. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+      },
+      {
+        "slug": "samsite",
+        "enabled": true,
+        "source": {
+          "type": "editable",
+          "path": "_external/samsite"
+        },
+        "note": "Package-mode (tap_plugin.samsite), installed EDITABLE from the CI checkout at _external/samsite so the suite runs against this repo's HEAD."
+      },
+      {
+        "slug": "grid_fixtures",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-grid-fixtures",
+          "rev": "v0.3.0"
+        },
+        "note": "Package-mode (tap_plugin.grid_fixtures). Install-only: the neutral grid_fixtures__* node/edge vocabulary the core suites build fixtures from. No GRIFT seed, no cross-plugin deps. (gryphon_playground, which depends_on it, is NOT installed in this customer-demo profile — the Gryphon test corpus stands up via its own in-package boot records selected by a bootstrap pointer.)"
+      }
+    ]
+  },
+  "population": {
+    "on_failure": "abort",
+    "steps": [
+      {
+        "type": "seed-plugin",
+        "plugin": "administrivia",
+        "enabled": true,
+        "note": "TAP admin pages + grid landing + cares administrivia."
+      },
+      {
+        "type": "seed-plugin",
+        "plugin": "computing_core",
+        "enabled": true,
+        "note": "Vendor-neutral computing-primitive dimension."
+      },
+      {
+        "type": "seed-plugin",
+        "plugin": "aws_core",
+        "enabled": true,
+        "note": "AWS dimension + region reference data the boto3 collector lands resources into."
+      },
+      {
+        "type": "seed-plugin",
+        "plugin": "github_core",
+        "enabled": true,
+        "note": "GitHub repo landing page."
+      },
+      {
+        "type": "seed-plugin",
+        "plugin": "samsite",
+        "enabled": true,
+        "note": "Samsite keystone, landing + compliance pages, per-type viewers, and the collector schedules."
+      },
+      {
+        "type": "seed-plugin",
+        "plugin": "fedramp_20x_ksi",
+        "enabled": true,
+        "note": "FedRAMP 20x KSI dimension, catalog seed, compliance/profile pages, schedule."
+      }
+    ]
+  }
+}

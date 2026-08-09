@@ -1,0 +1,43 @@
+# CI for tap-plugin-samsite.
+#
+# A thin caller. All the logic lives in the reusable workflow in the core TAP repo
+# (`.github/workflows/plugin-ci.yml`, req-plugin-extdev-repo-ci) so every plugin repo —
+# ours and external developers' — runs the SAME admission gate, and improving it is one
+# edit in one place rather than a fan-out across a dozen repos.
+#
+# Unlike a leaf plugin, samsite passes `boot_profile` and opts into the boot-and-test
+# job: this repo ships the samsite boot record (tap_plugin/samsite/boot/, since v0.2.0)
+# and its in-package suite carries the record gate (test_boot_record_resolves — digest
+# bijection, cold-resolve incl. collector keys, self-pin). That gate re-homed here from
+# core's shipped-profiles axis when the profile left tap/boot (req-boot-bootstrap-
+# samsite-rehome-4), so THIS workflow is what keeps it firing on push/PR; the nightly
+# depth leg in core (nightly-plugins.yml, keyed on ci/nightly.boot.json existing here)
+# re-runs it against current core main every night, catching core-side skew.
+#
+# ci/nightly.boot.json is the boot-and-test profile for BOTH cadences: the shipped
+# record's sibling closure at the same pins, with samsite itself installed editable
+# from the CI checkout (_external/samsite) so the suite tests this repo's HEAD.
+# Seed-only population — CI runs with an empty secrets root and never fires collectors.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Manual runs matter for a plugin repo: core can regress the plugin without a single
+  # commit landing HERE, and nothing else would re-run this gate before the nightly.
+  workflow_dispatch:
+
+# Explicit least-privilege GITHUB_TOKEN (CodeQL actions/missing-workflow-permissions).
+permissions:
+  contents: read
+
+jobs:
+  tap:
+    uses: unified-systems-com/tap/.github/workflows/plugin-ci.yml@main
+    with:
+      plugin_slug: samsite
+      # Pinned deliberately. `main` means "whatever core is today", which turns an
+      # unrelated core change into a surprise red here. Bump this on purpose.
+      harness_ref: main
+      boot_profile: ci/nightly.boot.json
