@@ -48,9 +48,11 @@ before running it**: the profile *declares* every secret it requires
 (`required_secrets`), and the boot preflight checks the declarations in seconds —
 before anything expensive runs — naming exactly what is missing, what kind it
 must be, and what it should be allowed to do. The failure output is the setup
-guide. With an AI assistant attached to the clone, `/provision-secrets` reads
-that same declaration and walks you from each gap to a working credential; the
-sections below are the canonical per-credential references it routes to.
+guide. With an AI assistant attached to the session worktree (spawn wires the
+skill farm there before boot runs, and prints the attach command when it
+finishes — or fails), `/provision-secrets` reads that same declaration and walks
+you from each gap to a working credential; the sections below are the canonical
+per-credential references it routes to.
 
 When something fails, the evidence is durable: `logs/boot/latest.boot-record.json`
 in the session worktree records which check failed and why — a *missing* secret
@@ -76,7 +78,7 @@ least-privilege note. Rows are still worth reading before your first boot:
 | 1 | AWS credential envelope at `$TAP_SECRETS_ROOT/aws_core/boto_collector.secret.json` (Step 1) | `aws_core:boto3` | preflight offline lane: `required secret aws_core:boto_collector missing` (or kind mismatch) — before anything runs |
 | 2 | Region scope on that envelope (Step 2) | `aws_core:boto3` | the run fails visibly — no implicit default |
 | 3 | GitHub PAT envelope at `$TAP_SECRETS_ROOT/github_core/collector.secret.json`, with a **live** token (Step 3) | `github_core:github_core` | missing → preflight offline lane names it; present-but-dead → the live self-test lane isolates it (401 on `/rate_limit`) — the two failures read differently on purpose |
-| 4 | Outbound HTTPS to your deployed site, `cisa.gov`, and the FedRAMP catalog host | `samsite:samsite-compliance`, `fedramp_20x_ksi:ksi-catalog` | boot aborts at the respective `fire-collector` step |
+| 4 | Outbound HTTPS to your deployed site, `cisa.gov`, and the FedRAMP catalog host | `samsite:samsite-compliance`, `fedramp_20x_ksi:ksi-catalog` | the preflight's live self-test lane fails the collector — still before any seeding |
 | 5 | `artifact_manifest.json` pointing at *your* deployment (Step 4) — reference values only work for the reference site | `samsite:samsite-compliance` | artifact fetches 404 or verify against the wrong signing repo |
 
 Two failure modes worth naming because they have bitten:
