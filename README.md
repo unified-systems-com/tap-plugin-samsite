@@ -235,9 +235,10 @@ boot at `fire-collector:github_core:github_core` with
 > **Known limitation.** The manifest is loaded from a path relative to the installed
 > module and there is no override — no env var, no boot-profile key, no collector
 > config. To point samsite at your own site today you need an **editable** checkout of
-> this plugin rather than a pinned git install:
-> `scripts/spawn-session.sh <name> samsite --dev-plugins samsite`. Making this
-> per-install configuration is tracked as the next change to this plugin.
+> this plugin rather than a pinned git install (the `--dev-plugins` plugin-workspace
+> flow; its pairing with `--from`-fetched records is being worked out as part of the
+> profile's re-home into this repo). Making this per-install configuration is tracked
+> as the next change to this plugin.
 
 The signing identity is *not* hardcoded: `sigstore_link.py` parses whatever SAN URI the
 verified certificate carries and resolves it against the grid. Change the manifest's
