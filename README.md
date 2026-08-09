@@ -38,13 +38,13 @@ deployment on the grid:
 mkdir -p ~/tap-sessions
 git clone git@github.com:unified-systems-com/tap.git ~/tap-sessions/main
 cd ~/tap-sessions/main
-scripts/spawn-session.sh sam --from git+https://github.com/unified-systems-com/tap-plugin-samsite@main#samsite
+scripts/spawn-session.sh sam --from git+https://github.com/unified-systems-com/tap-plugin-samsite@v0.2.0#samsite
 ```
 
 The boot profile ships **inside this plugin** as an in-package boot record — the
 `--from` pointer fetches it straight from this repository, so the tap clone
-carries nothing samsite-specific. `@main` floats with this repo's latest;
-substitute a release tag (`@v0.2.0`) to pin a reproducible standup. The spawn
+carries nothing samsite-specific. `@v0.2.0` pins the current release (immutable,
+digest-verified); substitute `@main` to float with this repo's latest. The spawn
 script checks your host itself (toolchain, layout — it tells you the fix for
 anything missing), pulls the published images (no local compile), and boots the
 record. **You do not need to get the credential setup right
