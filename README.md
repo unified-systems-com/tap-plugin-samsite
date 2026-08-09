@@ -29,18 +29,53 @@ of any profile, which the next section names explicitly.
 
 ---
 
+## The fast path
+
+From a bare machine (macOS or a Linux desktop with Docker) to the reference
+deployment on the grid:
+
+```bash
+mkdir -p ~/tap-sessions
+git clone git@github.com:unified-systems-com/tap.git ~/tap-sessions/main
+cd ~/tap-sessions/main
+scripts/spawn-session.sh sam samsite
+```
+
+The spawn script checks your host itself (toolchain, layout — it tells you the
+fix for anything missing), pulls the published images (no local compile), and
+boots the `samsite` profile. **You do not need to get the credential setup right
+before running it**: the profile *declares* every secret it requires
+(`required_secrets`), and the boot preflight checks the declarations in seconds —
+before anything expensive runs — naming exactly what is missing, what kind it
+must be, and what it should be allowed to do. The failure output is the setup
+guide. With an AI assistant attached to the clone, `/provision-secrets` reads
+that same declaration and walks you from each gap to a working credential; the
+sections below are the canonical per-credential references it routes to.
+
+When something fails, the evidence is durable: `logs/boot/latest.boot-record.json`
+in the session worktree records which check failed and why — a *missing* secret
+(provision it) reads differently from a *present-but-dead* one (rotate it) — and
+the `/diagnose-failed-session-spawn` skill reads that record first.
+
+> **Coming change:** this profile is moving out of the tap repo and into this
+> plugin as an in-package boot record, after which the spawn takes a `--from`
+> pointer at this repo and the tap clone needs no samsite-specific content. The
+> commands above are current until that lands; this README will carry the
+> pointer form when it does.
+
 ## Before you boot: the configuration checklist
 
-The profile's population phase runs with `on_failure: abort` — a missing or dead
-credential does not degrade the boot, it **kills it**, partway through, after the
-plugins have installed and seeded. Every row below must be true before
-`manage.py boot --profile samsite` (or `scripts/spawn-session.sh <name> samsite`):
+This table is the human summary of what the profile **declares machine-readably**
+in its `required_secrets` section — the boot preflight enforces it, so you never
+have to reconstruct this from prose: a gap fails the boot in seconds, before any
+seeding or collection, with the exact `scope:key`, expected kind, and
+least-privilege note. Rows are still worth reading before your first boot:
 
 | # | Requirement | Consumed by | If absent / stale |
 | --- | --- | --- | --- |
-| 1 | AWS credential envelope at `$TAP_SECRETS_ROOT/aws_core/boto_collector.secret.json` (Step 1) | `aws_core:boto3` | boot aborts at `fire-collector:aws_core:boto3` |
+| 1 | AWS credential envelope at `$TAP_SECRETS_ROOT/aws_core/boto_collector.secret.json` (Step 1) | `aws_core:boto3` | preflight offline lane: `required secret aws_core:boto_collector missing` (or kind mismatch) — before anything runs |
 | 2 | Region scope on that envelope (Step 2) | `aws_core:boto3` | the run fails visibly — no implicit default |
-| 3 | GitHub PAT envelope at `$TAP_SECRETS_ROOT/github_core/collector.secret.json`, with a **live** token (Step 3) | `github_core:github_core` | boot aborts: `GitHub API unreachable or PAT auth failed` (self-test gets 401 on `/rate_limit`) |
+| 3 | GitHub PAT envelope at `$TAP_SECRETS_ROOT/github_core/collector.secret.json`, with a **live** token (Step 3) | `github_core:github_core` | missing → preflight offline lane names it; present-but-dead → the live self-test lane isolates it (401 on `/rate_limit`) — the two failures read differently on purpose |
 | 4 | Outbound HTTPS to your deployed site, `cisa.gov`, and the FedRAMP catalog host | `samsite:samsite-compliance`, `fedramp_20x_ksi:ksi-catalog` | boot aborts at the respective `fire-collector` step |
 | 5 | `artifact_manifest.json` pointing at *your* deployment (Step 4) — reference values only work for the reference site | `samsite:samsite-compliance` | artifact fetches 404 or verify against the wrong signing repo |
 
@@ -52,9 +87,10 @@ Two failure modes worth naming because they have bitten:
   loader cannot know it was revoked without a network call) and then aborts the boot
   at collector-fire time. When you revoke credentials anywhere, sweep the envelopes
   in the same sitting.
-- **The boot's own output is the evidence.** The collector failure detail goes to the
-  terminal that ran `boot`, not to the container log — the container log will look
-  clean. Keep the output, or re-run `manage.py boot` to reproduce.
+- **The evidence is durable now.** Beyond the terminal output, every boot writes a
+  machine-readable record to `logs/boot/latest.boot-record.json` in the worktree —
+  phases, per-check status, and on failure the failing checks with their provider
+  error detail. Read it instead of re-running boot.
 
 ## Running samsite against your own deployment
 
@@ -77,6 +113,8 @@ checklist.
 4. **A TAP instance** with the `samsite` boot profile's plugin set installed.
 
 ### Step 1 — Place the AWS credential
+
+> This section is the canonical `aws_static_access_key` / `aws_assumed_role` reference the `/provision-secrets` skill routes to.
 
 The boto3 collector never reads credential files directly; credentials resolve through
 the `tap_cares` secrets subsystem. Drop one envelope under your `TAP_SECRETS_ROOT`:
@@ -134,6 +172,8 @@ certificates are us-east-1 by nature). Use whatever your own deployment actually
 every extra region is collection time you pay on every run.
 
 ### Step 3 — Place the GitHub credential
+
+> This section is the canonical `github_pat` reference the `/provision-secrets` skill routes to.
 
 The `github_core` collector walks the repository whose Actions workflow signs your
 artifacts — repo metadata, workflows, runs, jobs, and (permission allowing) runners.
