@@ -17,10 +17,44 @@ genuine 20x target rather than a demo fixture.
 - the collector schedules.
 
 It does **not** own AWS resource models, AWS edges, or the boto3 collector — those
-live in [`aws_core`](https://github.com/notgeorge/tap-plugin-aws-core). It does not own the
+live in [`aws_core`](https://github.com/unified-systems-com/tap-plugin-aws-core). It does not own the
 KSI catalog either; that is `fedramp_20x_ksi`.
 
+**Samsite is TAP's testing / demo configuration.** The `samsite` boot profile is the
+full-stack exercise: it installs eleven plugins, seeds their pages and schedules, then
+fires four collectors that pull a real deployment onto the grid. If you want to see
+everything TAP does in one boot — or verify that a change didn't break the end-to-end
+path — this is the profile to stand up. That also means it has the most preconditions
+of any profile, which the next section names explicitly.
+
 ---
+
+## Before you boot: the configuration checklist
+
+The profile's population phase runs with `on_failure: abort` — a missing or dead
+credential does not degrade the boot, it **kills it**, partway through, after the
+plugins have installed and seeded. Every row below must be true before
+`manage.py boot --profile samsite` (or `scripts/spawn-session.sh <name> samsite`):
+
+| # | Requirement | Consumed by | If absent / stale |
+| --- | --- | --- | --- |
+| 1 | AWS credential envelope at `$TAP_SECRETS_ROOT/aws_core/boto_collector.secret.json` (Step 1) | `aws_core:boto3` | boot aborts at `fire-collector:aws_core:boto3` |
+| 2 | Region scope on that envelope (Step 2) | `aws_core:boto3` | the run fails visibly — no implicit default |
+| 3 | GitHub PAT envelope at `$TAP_SECRETS_ROOT/github_core/collector.secret.json`, with a **live** token (Step 3) | `github_core:github_core` | boot aborts: `GitHub API unreachable or PAT auth failed` (self-test gets 401 on `/rate_limit`) |
+| 4 | Outbound HTTPS to your deployed site, `cisa.gov`, and the FedRAMP catalog host | `samsite:samsite-compliance`, `fedramp_20x_ksi:ksi-catalog` | boot aborts at the respective `fire-collector` step |
+| 5 | `artifact_manifest.json` pointing at *your* deployment (Step 4) — reference values only work for the reference site | `samsite:samsite-compliance` | artifact fetches 404 or verify against the wrong signing repo |
+
+Two failure modes worth naming because they have bitten:
+
+- **Credential rotation is not self-healing.** The envelopes hold copies. Revoking a
+  PAT or rotating an AWS key on the provider side leaves a dead credential in
+  `TAP_SECRETS_ROOT` that passes the load-time secrets check (it still parses; the
+  loader cannot know it was revoked without a network call) and then aborts the boot
+  at collector-fire time. When you revoke credentials anywhere, sweep the envelopes
+  in the same sitting.
+- **The boot's own output is the evidence.** The collector failure detail goes to the
+  terminal that ran `boot`, not to the container log — the container log will look
+  clean. Keep the output, or re-run `manage.py boot` to reproduce.
 
 ## Running samsite against your own deployment
 
@@ -38,7 +72,9 @@ checklist.
    decomposes into, is declarative in
    `tap_plugin/samsite/collectors/compliance_collector/artifact_manifest.json`.
 2. **An AWS principal that can read that account.** Read-only. See below.
-3. **A TAP instance** with the `samsite` boot profile's plugin set installed.
+3. **A GitHub token that can read the signing repo** — the repo whose Actions
+   workflow signs the artifacts. See Step 3.
+4. **A TAP instance** with the `samsite` boot profile's plugin set installed.
 
 ### Step 1 — Place the AWS credential
 
@@ -97,7 +133,56 @@ The reference deployment spans `us-east-1` and `us-east-2` (CloudFront and ACM
 certificates are us-east-1 by nature). Use whatever your own deployment actually spans —
 every extra region is collection time you pay on every run.
 
-### Step 3 — Point the compliance collector at your site
+### Step 3 — Place the GitHub credential
+
+The `github_core` collector walks the repository whose Actions workflow signs your
+artifacts — repo metadata, workflows, runs, jobs, and (permission allowing) runners.
+It resolves a fixed reference the same way the AWS collector does: scope
+`github_core`, key `collector`, kind `github_pat`:
+
+```
+$TAP_SECRETS_ROOT/github_core/collector.secret.json
+```
+
+```json
+{
+  "scope": "github_core",
+  "key": "collector",
+  "kind": "github_pat",
+  "description": "Fine-grained PAT for the github collector against my signing repo.",
+  "data": {
+    "token": "github_pat_...",
+    "repos": ["<owner>/<repo>"]
+  }
+}
+```
+
+`data` is strict: `token` and `repos` are required; `api_base_url` (default
+`https://api.github.com`) and `initial_run_limit` (default `10`, the run-history
+depth of the first pull) are the only other accepted fields. `repos` entries are
+`owner/repo` — for samsite, the repo your deploy workflow lives in.
+
+**Why a token is required at all.** Four reasons, in decreasing order of force:
+
+1. The reference signing repo is **private**, so every endpoint needs an
+   authenticated token with access to it. Yours may be public — the next three
+   reasons still apply.
+2. The `token` field is schema-required; the v0 collector has no anonymous mode.
+3. Anonymous GitHub API access is limited to 60 requests/hour; paginating runs and
+   jobs would starve. Authenticated is 5,000/hour.
+4. The runners endpoint requires elevated repo access even on public repos (the
+   collector degrades gracefully on 403 there — you lose runner nodes, nothing else).
+
+**Recommended token:** a fine-grained PAT scoped to only the signing repo, with
+read-only **Metadata**, **Contents**, and **Actions** permissions. Add
+**Administration (read)** only if you want runner nodes. Fine-grained PATs are bound
+to one resource owner — if the repo moves to an organization, the PAT does not
+follow; mint a new one under the new owner. Set an expiry you will actually outlive
+the demo with, or calendar the rotation: an expired or revoked token aborts the next
+boot at `fire-collector:github_core:github_core` with
+`GitHub API unreachable or PAT auth failed`.
+
+### Step 4 — Point the compliance collector at your site
 
 `artifact_manifest.json` carries three things that are specific to a deployment:
 
@@ -118,14 +203,14 @@ The signing identity is *not* hardcoded: `sigstore_link.py` parses whatever SAN 
 verified certificate carries and resolves it against the grid. Change the manifest's
 `github_repository` and verification follows your repo.
 
-### Step 4 — Boot, then fire the collectors in order
+### Step 5 — Boot, then fire the collectors in order
 
 The `samsite` boot profile seeds the pages and then fires four collectors. **The order
 is load-bearing**, and getting it wrong degrades silently rather than loudly:
 
-1. `aws_core:boto3` — the AWS resource graph. Must run **first**: it lands the
-   `aws_account` nodes that compliance-boundary membership is synthesized from.
-2. `github_core:github_core` — repository and Actions data. Must run **before** the
+1. `aws_core:boto3` — the AWS resource graph (Steps 1–2). Must run **first**: it lands
+   the `aws_account` nodes that compliance-boundary membership is synthesized from.
+2. `github_core:github_core` — repository and Actions data (Step 3). Must run **before** the
    compliance collector: `sigstore_link` resolves the signing workflow by content-match,
    and if the workflow node is not on the grid yet those `SIGNED_BY_IDENTITY` edges are
    **silently omitted**. You get a graph that looks fine and is missing its provenance
@@ -143,7 +228,7 @@ before investigating anything else.
 
 Named rather than implied, so you know what you are looking at:
 
-- **`artifact_manifest.json`** — site URL and signing repo (Step 3 above). The one
+- **`artifact_manifest.json`** — site URL and signing repo (Step 4 above). The one
   functional blocker for pointing samsite elsewhere.
 - **`samsite-keystone.grift.json`** — the instance keystone describes the reference
   deployment: its site URLs, its owner, and its upstream. Cosmetic, but it is what an AI
