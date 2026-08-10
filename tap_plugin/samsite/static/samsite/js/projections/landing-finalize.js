@@ -54,7 +54,7 @@ const SCOPE_BOXES = GROUPS.filter((g) => g.key !== "bootstrap").map((g) => ({lab
 // Same nesting rules as before — parent assignment is position-independent, so it
 // runs here once the leaf positions (incl. github + sigstore) are settled.
 const NESTING_RELATIONSHIPS = [
-    {name: "boundary-contains-account", gryphon: "(parent:fedramp_20x_ksi__boundary)<-[:SCOPED_TO_BOUNDARY__fedramp_20x_ksi]-(child:aws_core__aws_account)"},
+    {name: "boundary-contains-account", gryphon: "(parent:compliance_core__compliance_boundary)<-[:SCOPED_TO_COMPLIANCE_BOUNDARY__compliance_core]-(child:aws_core__aws_account)"},
     {name: "account-owns-resource",     dimension_match: {parent_type: "aws_core__aws_account", dimension: "aws_account"}},
     {name: "platform-hosts-account",    gryphon: "(parent:github_core__github_platform)-[:HOSTS_ACCOUNT__github_core]->(child:github_core__github_account)"},
     {name: "account-owns-repo",         gryphon: "(parent:github_core__github_account)-[:OWNS_REPO__github_core]->(child:github_core__github_repository)"},
@@ -77,7 +77,7 @@ const BOOT_GAP = 160;     // edge-to-edge gap for the Deploy & Bootstrap row (ad
 // Deploy & Bootstrap reads left→right by role: state-lock → tfstate bucket →
 // deploy role → OIDC provider (the root, rightmost, nearest GitHub). adh needs
 // this explicit order since it's semantic, not alphabetical (sort:false).
-const BOOT_TYPE_ORDER = ["aws_dynamodb_table", "aws_s3_bucket", "aws_iam_role", "aws_iam_oidc_provider"];
+const BOOT_TYPE_ORDER = ["aws_core__aws_dynamodb_table", "aws_core__aws_s3_bucket", "aws_core__aws_iam_role", "aws_core__aws_iam_oidc_provider"];
 const REKOR_GAP = 175;    // spacing between Rekor entries
 const REKOR_ABOVE = 120;  // how far above TOP_Y the Rekor row sits
 
@@ -85,7 +85,7 @@ const REKOR_ABOVE = 120;  // how far above TOP_Y the Rekor row sits
 // timestamped node per run, so the grid accumulates snapshots; the landing shows
 // only the latest of each. Dedicated computing_core.file nodes + history are a
 // deferred "storage" question — for now these existing domain nodes are the files.
-const FILE_TYPES = ["ksi_signal", "vdr_report", "compliance_artifact"];
+const FILE_TYPES = ["fedramp_20x_ksi__ksi_signal", "fedramp_20x_ksi__vdr_report", "compliance_core__compliance_artifact"];
 
 // Parse a file node's display name, shaped "<head> @ <iso-timestamp>". The graph
 // only carries name + entity_type + tags + dimensions onto cy node data (per
@@ -108,7 +108,7 @@ function pruneToLatestFiles(cy) {
     const groups = {};
     cy.nodes().filter((n) => FILE_TYPES.includes(n.data("entity_type"))).forEach((n) => {
         const t = n.data("entity_type");
-        const key = t === "compliance_artifact" ? `${t}:${_parseName(n).head}` : t;
+        const key = t === "compliance_core__compliance_artifact" ? `${t}:${_parseName(n).head}` : t;
         (groups[key] = groups[key] || []).push(n);
     });
     const stale = [];
@@ -128,9 +128,9 @@ const _FILE_NAME_BY_KIND = {oscal_ssp: "oscal-ssp.json", oscal_poam: "oscal-poam
 function shortFileLabel(n) {
     const t = n.data("entity_type");
     const head = _parseName(n).head;
-    if (t === "compliance_artifact") return _FILE_NAME_BY_KIND[head] || head || "artifact";
-    if (t === "ksi_signal") return "ksi-signal.json";
-    if (t === "vdr_report") return "vdr-report.json";
+    if (t === "compliance_core__compliance_artifact") return _FILE_NAME_BY_KIND[head] || head || "artifact";
+    if (t === "fedramp_20x_ksi__ksi_signal") return "ksi-signal.json";
+    if (t === "fedramp_20x_ksi__vdr_report") return "vdr-report.json";
     return head || t;
 }
 
@@ -259,7 +259,7 @@ export async function execute(context) {
         if (edge && edge.length > 0) edge.addClass(HIDDEN_CONTAINMENT_CLASS);
     });
     // Boundary: outline-only frame (transparent body) around the aws_account compound.
-    cy.nodes('[entity_type="fedramp_20x_ksi__boundary"]').style({"background-opacity": 0});
+    cy.nodes('[entity_type="compliance_core__compliance_boundary"]').style({"background-opacity": 0});
 
     // 7. Scope boxes — labeled overlays per AWS cluster, drawn from the settled
     //    member positions.
@@ -309,7 +309,7 @@ export async function execute(context) {
         const leftX = frontBB.x1 + 30;
         // Issuer pinned far-left (static) — closest to the box edge for its hops out
         // to AWS / up to Sigstore.
-        cy.nodes('[entity_type="github_core__oidc_issuer"]').forEach((n) => {
+        cy.nodes('[entity_type="identity_core__oidc_issuer"]').forEach((n) => {
             n.position({x: leftX, y: appRowY});
             n.move({parent: platform.id()});
         });
@@ -332,7 +332,7 @@ export async function execute(context) {
     // default is top/center; github_app inherits a baked default). Drive it through
     // the standard label-position data fields so the node[label_valign][label_halign]
     // rule applies it.
-    cy.nodes('[entity_type="github_core__oidc_issuer"], [entity_type="github_core__github_app"]').forEach((n) => {
+    cy.nodes('[entity_type="identity_core__oidc_issuer"], [entity_type="github_core__github_app"]').forEach((n) => {
         n.data("label_valign", "bottom");
         n.data("label_halign", "center");
         n.data("label_margin_y", 4);
@@ -344,7 +344,7 @@ export async function execute(context) {
     // FedRAMP boundary, aligned with the system part they touch.
     const OUTSIDE_GAP = 130;
     const userByName = (re) => cy.nodes('[entity_type="computing_core__user"]').filter((n) => re.test(n.data("label") || ""));
-    const boundary = cy.nodes('[entity_type="fedramp_20x_ksi__boundary"]').first();
+    const boundary = cy.nodes('[entity_type="compliance_core__compliance_boundary"]').first();
     const bndBB = boundary.nonempty() ? boundary.boundingBox() : null;
     // Readers → left of the boundary, level with the CloudFront CDN they read from.
     const cf = cy.nodes('[entity_type="aws_core__aws_cloudfront_distribution"]').first();
@@ -382,6 +382,6 @@ export async function execute(context) {
     //     both makes z-index strict, so the edge (z 1) draws above the platform box
     //     (z 0) — issuer connection visible — while the account/repo "auto" group still
     //     floats above and occludes it. account/repo untouched. (Edge label = type.)
-    cy.edges('[label="IDENTITY_VOUCHED_BY"]').style({"z-compound-depth": "bottom", "z-index": 1, "z-index-compare": "manual"});
+    cy.edges('[label="IDENTITY_VOUCHED_BY__sigstore_core"]').style({"z-compound-depth": "bottom", "z-index": 1, "z-index-compare": "manual"});
     cy.nodes('[entity_type="github_core__github_platform"]').style({"z-compound-depth": "bottom", "z-index": 0, "z-index-compare": "manual"});
 }

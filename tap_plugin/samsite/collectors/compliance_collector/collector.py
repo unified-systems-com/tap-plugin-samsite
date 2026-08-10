@@ -302,7 +302,7 @@ class SamsiteComplianceCollector(CollectorBase):
         sig_seen_node_ids: set[str] = set()
 
         for fetched_item in fetched:
-            if fetched_item["artifact"]["handling"] != "fedramp_20x_ksi__ksi_signal":
+            if fetched_item["artifact"]["handling"] != "ksi_signal":
                 continue
             artifact = fetched_item["artifact"]
             try:
@@ -325,7 +325,7 @@ class SamsiteComplianceCollector(CollectorBase):
             )
 
         for fetched_item in fetched:
-            if fetched_item["artifact"]["handling"] != "fedramp_20x_ksi__vdr_report":
+            if fetched_item["artifact"]["handling"] != "vdr_report":
                 continue
             artifact = fetched_item["artifact"]
             try:
@@ -352,7 +352,7 @@ class SamsiteComplianceCollector(CollectorBase):
 
         for fetched_item in fetched:
             artifact = fetched_item["artifact"]
-            if artifact["handling"] != "compliance_core__compliance_artifact":
+            if artifact["handling"] != "compliance_artifact":
                 continue
             decomp = decompose_compliance_artifact(
                 body=fetched_item["body"],
