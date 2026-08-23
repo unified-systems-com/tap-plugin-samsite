@@ -1,5 +1,23 @@
 # Samsite plugin
 
+![The samsite authorization boundary rendered as a live graph: AWS serving and compliance resources inside the boundary, with the GitHub deploy pipeline, Sigstore transparency log, and CISA KEV catalog connected around it](docs/screenshots/samsite-boundary-graph.png)
+
+This is a real deployment's authorization boundary, rendered as a living graph —
+collected from the running system, not drawn. Every authorization package has a
+boundary diagram; most are drawn once and stale by the next sprint. This one is
+generated from what is actually deployed. The red boundary encloses the AWS
+resources the collector found in the account — the CloudFront/Route 53/S3 serving
+path, the Lambda that runs OPA compliance checks and the IAM role it assumes, the
+Terraform state locks from bootstrap. Around it sit the systems your security
+program actually depends on but rarely draws: the GitHub repository and Actions
+workflow that deploys the site, the Sigstore transparency-log entries attesting
+every signed compliance artifact, and CISA's Known Exploited Vulnerabilities
+catalog — on the same graph as the inventory it applies to.
+
+The edges are typed facts, not arrows: `ROUTES_TRAFFIC`, `ASSUMES_ROLE`,
+`ATTESTED_BY`, `FEDERATES_VIA`. "What talks to what, and who vouches for it" becomes
+a query you can run, not an interview you have to schedule.
+
 Samsite is TAP's reference assessment target: a real, deployed website whose AWS
 infrastructure, GitHub build/deploy pipeline, and signed `/.well-known/` compliance
 artifacts are all pulled onto the grid so Rampart can assess it end to end. It is a
@@ -31,29 +49,11 @@ of any profile, which the next section names explicitly.
 
 ## What it looks like
 
-Three screens from a live instance pointed at the reference deployment. Everything
-in them is collected data — nothing is a mockup, and nothing was typed in by hand.
-If your team is staring at FedRAMP 20x and asking "what is continuous, machine-readable
-assessment actually supposed to look like?", this is one concrete answer, small enough
-to read end to end.
-
-### The authorization boundary, as a living graph
-
-![The samsite authorization boundary rendered as a live graph: AWS serving and compliance resources inside the boundary, with the GitHub deploy pipeline, Sigstore transparency log, and CISA KEV catalog connected around it](docs/screenshots/samsite-boundary-graph.png)
-
-Every authorization package has a boundary diagram; most are drawn once and stale by
-the next sprint. This one is generated from what is actually deployed. The red
-boundary encloses the AWS resources the collector found in the account — the
-CloudFront/Route 53/S3 serving path, the Lambda that runs OPA compliance checks and
-the IAM role it assumes, the Terraform state locks from bootstrap. Around it sit the
-systems your security program actually depends on but rarely draws: the GitHub
-repository and Actions workflow that deploys the site, the Sigstore transparency-log
-entries attesting every signed compliance artifact, and CISA's Known Exploited
-Vulnerabilities catalog — on the same graph as the inventory it applies to.
-
-The edges are typed facts, not arrows: `ROUTES_TRAFFIC`, `ASSUMES_ROLE`,
-`ATTESTED_BY`, `FEDERATES_VIA`. "What talks to what, and who vouches for it" becomes
-a query you can run, not an interview you have to schedule.
+Two more screens from the same live instance, alongside the boundary graph above.
+Everything in them is collected data — nothing is a mockup, and nothing was typed in
+by hand. If your team is staring at FedRAMP 20x and asking "what is continuous,
+machine-readable assessment actually supposed to look like?", this is one concrete
+answer, small enough to read end to end.
 
 ### The 20x scoreboard: 47 KSIs, scored from signed emissions
 
