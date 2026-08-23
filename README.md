@@ -1,4 +1,4 @@
-# Samsite plugin
+# Rampart:  Samsite Demonstration Plugin
 
 ![The samsite authorization boundary rendered as a live graph: AWS serving and compliance resources inside the boundary, with the GitHub deploy pipeline, Sigstore transparency log, and CISA KEV catalog connected around it](docs/screenshots/samsite-boundary-graph.png)
 
