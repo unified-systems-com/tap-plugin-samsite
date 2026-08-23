@@ -25,19 +25,6 @@ cross-deployment of Sam Aydlette's [samaydlette.com](https://github.com/sam-aydl
 whose Terraform is a [FedRAMP 20x](https://www.fedramp.gov/20x/) compliance overlay —
 which is what makes it a genuine 20x target rather than a demo fixture.
 
-**Samsite is a projection/pages plugin.** It owns:
-
-- the landing page that projects the deployment as a Cytoscape graph,
-- the compliance pages (KSI scoreboard, OSCAL POA&M, IIW inventory, VDR report),
-- the per-type viewer pages,
-- the compliance collector that fetches and sigstore-verifies the signed
-  `/.well-known/` artifacts,
-- the collector schedules.
-
-It does **not** own AWS resource models, AWS edges, or the boto3 collector — those
-live in [`aws_core`](https://github.com/unified-systems-com/tap-plugin-aws-core). It does not own the
-KSI catalog either; that is `fedramp_20x_ksi`.
-
 **Samsite is TAP's testing / demo configuration.** The `samsite` boot profile is the
 full-stack exercise: it installs eleven plugins, seeds their pages and schedules, then
 fires four collectors that pull a real deployment onto the grid. If you want to see
@@ -109,3 +96,18 @@ Behavior is specified in `specs/`:
 - `spec-samsite-ksi-scoreboard-v0.md` — the KSI scoreboard panel
 - `spec-samsite-vdr-ingestion-health-v0.md` — VDR ingestion health
 - `spec-samsite-viewer-pages-v0.md` — the per-type viewer pages
+
+---
+
+**Samsite is a projection/pages plugin.** It owns:
+
+- the landing page that projects the deployment as a Cytoscape graph,
+- the compliance pages (KSI scoreboard, OSCAL POA&M, IIW inventory, VDR report),
+- the per-type viewer pages,
+- the compliance collector that fetches and sigstore-verifies the signed
+  `/.well-known/` artifacts,
+- the collector schedules.
+
+It does **not** own AWS resource models, AWS edges, or the boto3 collector — those
+live in [`aws_core`](https://github.com/unified-systems-com/tap-plugin-aws-core). It does not own the
+KSI catalog either; that is `fedramp_20x_ksi`.
