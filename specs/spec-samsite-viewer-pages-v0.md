@@ -43,6 +43,7 @@ Every viewer shares a workbench shape: a trust/coverage band, headline stats, th
 ### Artifact Inventory Page
 ----
 RID: `req-samsite-artifact-inventory`
+
 Status: `Implemented`
 
 `/samsite/artifacts` mounts the three existing compliance table panel instances (`samsite-compliance-ksi-signals`, `-vdr-reports`, `-artifacts`) as movable subjects — KSI Signal Emissions, VDR Reports, and a Compliance Artifacts table grouped by `kind` (IIW / POA&M / SSP). Node-mode rows click through to the matching viewer via `PER_TYPE_DETAIL_URL`. It is the discoverable launch surface for the Artifacts section.
@@ -50,6 +51,7 @@ Status: `Implemented`
 ### Viewer Routes & IA
 ----
 RID: `req-samsite-viewer-routes`
+
 Status: `Implemented`
 
 | Type | Route | Renderer |
@@ -68,6 +70,7 @@ All are bare-slug, discoverable pages (no `urls.py` parameterized routes); they 
 ### KSI Signal Viewer
 ----
 RID: `req-samsite-viewer-ksi-signal`
+
 Status: `Implemented`
 
 `samsite-ksi-signal-workbench` resolves a `ksi_signal` and recomposes it: a trust band (signature + disclosure pills, `unknown ≠ false`); Headline Stats (components, types, checks passed/failed, violations); the **Violations** panel directly below the headline (load-bearing — "no violations" leads); a **components Tabulator** (grouped by `component_id` prefix so all AWS resources fall under one "AWS" heading with the specific type in the Type column, C/I/A as L/M/H badges, sortable + quick-filter); a validations table; and signal-metadata + provenance footers. Components/validations/violations are walked from the signal over their edges (envelope filtered to the child type).
@@ -75,6 +78,7 @@ Status: `Implemented`
 ### VDR Report Viewer
 ----
 RID: `req-samsite-viewer-vdr-report`
+
 Status: `Implemented`
 
 `samsite-vdr-report-workbench` resolves a `vdr_report`: a coverage band (`kev_catalog_loaded` / `dependabot_alerts_loaded`, `unknown ≠ false`); Headline Stats counted from the rendered findings (total, KEV, blocking, internet-reachable, risk-accepted); a **findings Tabulator** (PAIN badge, KEV/net/blocking tick columns, sortable + quick-filter); report-metadata footer. Findings walk `REPORTS_FINDING`.
@@ -82,6 +86,7 @@ Status: `Implemented`
 ### IIW Viewer
 ----
 RID: `req-samsite-viewer-iiw`
+
 Status: `Implemented`
 
 `samsite-iiw-workbench` resolves an `iiw` `compliance_artifact`, parses its CSV `content` into a Tabulator with **dynamic columns from the header** (positional keys so arbitrary header text is safe), sortable + quick-filter. The page is **full-bleed** (drops the max-width cap) and the headers render at **-45°** so the wide workbook's columns fit; a provenance band + footer bracket it.
@@ -89,6 +94,7 @@ Status: `Implemented`
 ### OSCAL SSP / POA&M Viewers
 ----
 RID: `req-samsite-viewer-oscal`
+
 Status: `Implemented`
 
 `/samsite/artifacts/ssp` and `/poam` mount roscale's `oscal_workbench` / `oscal_poam_workbench` (relocated from `/samsite/compliance/*`), resolving the latest samsite-collected artifact of the matching `kind`. The POA&M workbench leads with Headline Stats, defaults the Open + Risk-Accepted register groups expanded, and footers the provenance/metadata.
@@ -96,6 +102,7 @@ Status: `Implemented`
 ### Provenance + Disclosure Band
 ----
 RID: `req-samsite-viewer-provenance-band`
+
 Status: `Implemented`
 
 Each viewer surfaces `signature_verified` (✓/✗/unknown) + signer identity, and machine-readable disclosure/coverage flags as pills — an absent flag renders `unknown`, distinct from explicit `false`, never a silent omission.
@@ -103,6 +110,7 @@ Each viewer surfaces `signature_verified` (✓/✗/unknown) + signer identity, a
 ### Sequence Navigator
 ----
 RID: `req-samsite-viewer-sequence-nav`
+
 Status: `Implemented`
 
 A `tap_web` `sequence-nav` panel is mounted above each viewer, sharing the viewer's `entity_id_var`; it resolves the full newest-first emission sequence and renders Older/Newer + "N of M · ‹when› · latest". Canonical contract: `tap_web/specs/spec-web-panel-sequence-navigation-v0.md`. (Graduated the entity-resolution "History timeline panel" seam.)
@@ -110,6 +118,7 @@ A `tap_web` `sequence-nav` panel is mounted above each viewer, sharing the viewe
 ### Faceted Toggle Filters
 ----
 RID: `req-samsite-viewer-toggle-filters`
+
 Status: `Implemented`
 
 The VDR Headline Stats (KEV, blocking, internet-reachable, risk-accepted) are toggle cards that down-select the findings Tabulator — AND-combined with each other and with the text quick-filter; the Findings total is clear-all. A hollow corner dot marks the togglable boxes (fills + tints when active). A **zero-count** toggle filters to nothing, so it renders inert (no dot, no hover, no click). The cards drive one combined `setFilter` via `Tabulator.findTable` (the filter input bypasses panel-table.js's wiring so text + facets compose).
@@ -117,6 +126,7 @@ The VDR Headline Stats (KEV, blocking, internet-reachable, risk-accepted) are to
 ### Plugin Dependency on roscale
 ----
 RID: `req-samsite-viewer-plugin-dependency`
+
 Status: `Implemented`
 
 The OSCAL viewers reuse roscale's `oscal_workbench` / `oscal_poam_workbench` — a **deliberate, intended** cross-plugin dependency (the legitimate kind under the hermetic coincidental-vs-deliberate axis; `req-tap-test-hermetic-plugins` Future). Samsite mounts the registered panels and configures their public entity-resolution config only; no reach-in. (Lifting the renderer to a shared home remains an option if a third consumer appears.)
@@ -124,6 +134,7 @@ The OSCAL viewers reuse roscale's `oscal_workbench` / `oscal_poam_workbench` —
 ### Row-Nav Map Coupling
 ----
 RID: `req-samsite-viewer-row-nav-coupling`
+
 Status: `Implemented` (acknowledged debt)
 
 Per-type row navigation lives in a hardcoded `PER_TYPE_DETAIL_URL` map in `tap_web/static/tap_web/js/panel-table.js` naming samsite routes (`ksi_signal`, `vdr_report`, `compliance_artifact` fanned by kind, plus the sub-entity routes). Core `tap_web` JS coupled to plugin URLs — recorded as debt on the plugin-dependency backlog; a plugin should register its detail routes rather than core hardcoding them.

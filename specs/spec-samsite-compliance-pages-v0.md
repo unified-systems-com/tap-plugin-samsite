@@ -36,6 +36,7 @@ Samsite chose two sibling pages rather than a single combined page because the S
 ### SSP Page
 ----
 RID: `req-samsite-pages-ssp`
+
 Status: `Implemented`
 
 Samsite contributes a GRIFT page at the route `/samsite/compliance/ssp`. The page hosts a single panel instance with `panel_type_slug = "roscale-oscal-workbench"` (provided by the ROSCALE plugin). The panel's config names the SSP page variable; defaults from ROSCALE apply when the config doesn't override.
@@ -53,6 +54,7 @@ Source artifact: the OSCAL SSP fetched by the [samsite compliance collector](spe
 ### POA&M Page
 ----
 RID: `req-samsite-pages-poam`
+
 Status: `Implemented`
 
 Samsite contributes a GRIFT page at the route `/samsite/compliance/poam`. The page hosts a single panel instance with `panel_type_slug = "roscale-oscal-poam-workbench"`. The panel's config names the POA&M page variable; defaults from ROSCALE apply when the config doesn't override.
@@ -70,6 +72,7 @@ Source artifact: the OSCAL POA&M fetched by the samsite compliance collector fro
 ### URL-Backed Page Variables
 ----
 RID: `req-samsite-pages-vars`
+
 Status: `Implemented`
 
 Both pages expose a single URL-backed page variable per the TAP Web page-variable spec:
@@ -92,6 +95,7 @@ These names match ROSCALE's defaults (the panel resolves them with no extra conf
 ### Navigation Discoverability
 ----
 RID: `req-samsite-pages-discovery`
+
 Status: `Implemented`
 
 The two compliance pages must be reachable from Samsite's existing navigation surface (e.g. the Samsite landing page or a compliance-area link), not URL-only routes. v0 minimum: a link or card from a Samsite page already in the navigation graph that points at each compliance page.
@@ -108,6 +112,7 @@ The two compliance pages must be reachable from Samsite's existing navigation su
 ### No Rendering Code In Samsite
 ----
 RID: `req-samsite-pages-no-code`
+
 Status: `Implemented`
 
 Samsite must not ship any OSCAL parser, validator, panel type, template, or static asset for these pages. All rendering code lives in the ROSCALE plugin. If Samsite ever needs to deviate (e.g. a Samsite-flavored OSCAL section the workbench doesn't render), the right move is to extend ROSCALE rather than fork rendering into Samsite — file a ROSCALE change request.
@@ -122,6 +127,7 @@ Samsite must not ship any OSCAL parser, validator, panel type, template, or stat
 ### GRIFT Layout
 ----
 RID: `req-samsite-pages-grift`
+
 Status: `Implemented`
 
 The GRIFT files for these pages live under `plugins/samsite/grift/` per the existing convention. File naming should clearly indicate scope (e.g. `compliance-pages-ssp.grift.json`, `compliance-pages-poam.grift.json`, or a combined `compliance-pages.grift.json` — pick one convention and apply consistently).
