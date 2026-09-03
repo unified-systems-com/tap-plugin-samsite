@@ -31,6 +31,7 @@ This is consumer-side discipline, codified by the `consumer-side-disclosure-comp
 ### Panel Type Contract
 ----
 RID: `req-samsite-vdr-health-panel`
+
 Status: `Implemented`
 
 Slug **`samsite-vdr-ingestion-health`**, registered in `tap_web.registry.panel_type_registry` via `SamsiteConfig.ready()`. Panel module at `plugins/samsite/panels/vdr_ingestion_health/__init__.py`. ClassVars follow the standard duck-typed contract (slug, label, view, css, js, config_defaults). The `get_view_context` classmethod resolves the latest `vdr_report` and emits the flag list as template context.
@@ -45,6 +46,7 @@ Slug **`samsite-vdr-ingestion-health`**, registered in `tap_web.registry.panel_t
 ### Latest Report Resolution
 ----
 RID: `req-samsite-vdr-health-resolution`
+
 Status: `Implemented`
 
 `_load_latest_vdr_report()` runs `MATCH (r:vdr_report)` via Gryphon and sorts the result in Python by the per-model `emitted_at` field (ISO 8601 string, sorts lexically as chronological). Returns the first node, or `None` if no `vdr_report` is on the grid yet.
@@ -61,6 +63,7 @@ The shape mirrors `_lookup_latest_by_kind` from the ROSCALE panel-common module 
 ### Pill Rendering
 ----
 RID: `req-samsite-vdr-health-pills`
+
 Status: `Implemented`
 
 For each entry in the panel's `DISCLOSURE_FLAGS` list (currently `kev_catalog_loaded` and `dependabot_alerts_loaded`):
@@ -82,6 +85,7 @@ Each pill carries the flag's help text as a `title=` tooltip so the user can hov
 ### Degraded Warning
 ----
 RID: `req-samsite-vdr-health-warning`
+
 Status: `Implemented`
 
 When the panel context's `any_false` is true (at least one flag is in the `missing` state), the panel container picks up a `samsite-vdr-health-degraded` class (red background) AND emits an explicit caveat paragraph: "One or more upstream ingestions did not run in the latest VDR build. Findings derived from the corresponding source are absent by omission, not by clean signal — interpret 'no findings' of that source with care."
@@ -98,6 +102,7 @@ When the panel context's `any_false` is true (at least one flag is in the `missi
 ### Compliance Landing Placement
 ----
 RID: `req-samsite-vdr-health-page-row`
+
 Status: `Implemented`
 
 The panel is hosted on `/samsite/compliance` as **row 1** (top of page), above the nav-links cards and the existing 9 entity tables. Wired via `compliance-landing.grift.json` v0.3.0 page-layout batch + the sibling vdr-ingestion-health panel batch.
@@ -114,6 +119,7 @@ The placement reflects the panel's job: it's an orientation widget answering "is
 ### Flag List Extensibility
 ----
 RID: `req-samsite-vdr-health-extensibility`
+
 Status: `Backlog`
 
 The `DISCLOSURE_FLAGS` list is currently hardcoded in the panel module. New flags added upstream require a code update. Future work: make it config-driven (so consumers can add flags via GRIFT) or auto-discover flags by introspecting `summary` keys with the `_loaded` suffix.

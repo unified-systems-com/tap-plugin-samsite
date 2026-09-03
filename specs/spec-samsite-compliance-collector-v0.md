@@ -54,6 +54,7 @@ collector is its first proving instance.
 ### The Collector
 ----
 RID: `req-samsite-collector`
+
 Status: `Proposed`
 
 A `CollectorBase` subclass in the `samsite` plugin. Unlike the boto3 collector
@@ -80,6 +81,7 @@ artifacts that succeeded.
 ### Artifact Manifest
 ----
 RID: `req-samsite-collector-manifest`
+
 Status: `Proposed`
 
 The set of URLs to fetch and how to handle each is **declarative data, not
@@ -100,6 +102,7 @@ reading collector code.
 ### Signature Verification
 ----
 RID: `req-samsite-collector-verify`
+
 Status: `Implemented`
 
 Every artifact ships a paired `.bundle` (Sigstore keyless: Fulcio cert +
@@ -147,6 +150,7 @@ sandbox/satellite concern and is out of scope.
 ### Decomposition
 ----
 RID: `req-samsite-collector-decompose`
+
 Status: `Proposed`
 
 The collector does not define model shapes — it produces nodes and edges per
@@ -173,6 +177,7 @@ The collector does not define model shapes — it produces nodes and edges per
 ### Daily Schedule
 ----
 RID: `req-samsite-collector-schedule`
+
 Status: `Proposed`
 
 The collector is registered to run on a daily schedule through the existing
@@ -189,6 +194,7 @@ collector configuration, not new scheduling infrastructure.
 ### Identity And Emission History
 ----
 RID: `req-samsite-collector-identity`
+
 Status: `Proposed`
 
 Deterministic identity, so re-runs upsert:
@@ -222,6 +228,7 @@ history system when emission volume warrants it.
 ### Authorization Boundary Membership (v0 KLUDGE)
 ----
 RID: `req-samsite-collector-boundary-membership`
+
 Status: `Proposed`
 
 > ⚠️ **This requirement is a deliberate, documented KLUDGE for the sam demo.**
@@ -275,6 +282,7 @@ moment there is more than one account or any out-of-scope resource. Code:
 ### CISA KEV Fetch Process
 ----
 RID: `req-samsite-collector-kev-fetch`
+
 Status: `Proposed`
 
 The samsite deploy pipeline fetches the CISA Known Exploited Vulnerabilities
@@ -321,6 +329,7 @@ github_workflow (deploy) ─FETCHES─▶ web_document (CISA KEV catalog) ─HOS
 ### v0 Non-Goals
 ----
 RID: `req-samsite-collector-nongoals`
+
 Status: `Proposed`
 
 - **Generic web collector.** v0 is the concrete samsite collector. A reusable

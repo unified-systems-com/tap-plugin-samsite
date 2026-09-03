@@ -39,6 +39,7 @@ What this fixes: the original repo doesn't surface KSI-family status anywhere; t
 ### Page and Panel Instance
 ----
 RID: `req-samsite-scoreboard-page`
+
 Status: `Implemented`
 
 Samsite contributes a GRIFT page at `/samsite/compliance/scoreboard` that hosts a single panel instance with `panel_type_slug = "samsite-ksi-scoreboard"`. The page is reachable from the existing `/samsite/compliance` landing via the third nav-link card (added to the `samsite-nav-links` panel in the `compliance-landing.grift.json` nav-additions batch).
@@ -54,6 +55,7 @@ Samsite contributes a GRIFT page at `/samsite/compliance/scoreboard` that hosts 
 ### Panel Type Contract
 ----
 RID: `req-samsite-scoreboard-panel`
+
 Status: `Implemented`
 
 ROSCALE registered slug: **`samsite-ksi-scoreboard`**. Lives at `plugins/samsite/panels/ksi_scoreboard/__init__.py`. Panel type ClassVars follow the duck-typed contract used elsewhere in TAP (slug, label, view, css, js, config_defaults, classmethod `get_view_context`).
@@ -84,6 +86,7 @@ Consumers can override any of these. The two `*_var` keys name the URL-backed pa
 ### Dual-Artifact Resolution
 ----
 RID: `req-samsite-scoreboard-resolution`
+
 Status: `Implemented`
 
 The scoreboard needs **both** the latest OSCAL SSP and the latest OSCAL POA&M to render fully. Resolution is per-artifact and follows the [[panel-latest-emission-fallback-pattern]]:
@@ -105,6 +108,7 @@ Helpers `_lookup_by_entity_id` and `_lookup_latest_by_kind` are imported from `p
 ### Per-Control and Per-Indicator Scoring
 ----
 RID: `req-samsite-scoreboard-scoring`
+
 Status: `Implemented`
 
 The scoring math is in `plugins/samsite/scoring.py` and is pure: it takes a list of indicator dicts, the parsed SSP doc, and the parsed POA&M doc (any of which may be `None`), and returns a `ScoreboardResult` dataclass with per-indicator detail and aggregate totals.
@@ -150,6 +154,7 @@ If an indicator has no `controls` array at all, it's treated as `gap` (the catal
 ### Class-Aware Filtering
 ----
 RID: `req-samsite-scoreboard-class-filter`
+
 Status: `Implemented`
 
 The system's FedRAMP 20x class is read from the SSP's metadata as a prop named `fedramp-class` (samsite declares Class C). Indicators whose `classes` array excludes the system class are skipped from scoring entirely and counted under `excluded_class_mismatch` for transparency.
@@ -167,6 +172,7 @@ If the SSP doesn't carry the prop (and no override is supplied), all indicators 
 ### Class-Variant Control Overrides
 ----
 RID: `req-samsite-scoreboard-class-variants`
+
 Status: `Implemented`
 
 `ksi_indicator.class_variants` is an optional object keyed by class (e.g. `"c"`, `"d"`) whose value is an object with its own `controls` array. When the system's class has a matching variant, that variant's `controls` list replaces the base `controls`. Otherwise the base list applies.
@@ -183,6 +189,7 @@ In Samsite's current GRIFT seed, every indicator has `class_variants = null`, so
 ### Rendering Contract
 ----
 RID: `req-samsite-scoreboard-rendering`
+
 Status: `Implemented`
 
 The scoreboard renders as a single panel with four layers:
@@ -216,6 +223,7 @@ Status pill / badge colors:
 ### Error and Degraded Behavior
 ----
 RID: `req-samsite-scoreboard-errors`
+
 Status: `Implemented`
 
 Failure modes and responses:
@@ -237,6 +245,7 @@ Failure modes and responses:
 ### Gap Explanation
 ----
 RID: `req-samsite-scoreboard-gap-explanation`
+
 Status: `Backlog`
 
 A `gap` status today means "at least one control referenced by the indicator is not in the SSP." That's accurate but not enriching — users can't tell which of two distinct shapes the gap takes:
@@ -255,6 +264,7 @@ Future work: vendor or fetch a Rev-5 catalog (or the FedRAMP-resolved profile ch
 ### Emission History / Drift
 ----
 RID: `req-samsite-scoreboard-history`
+
 Status: `Backlog`
 
 Each `compliance_artifact` is per-emission (the samsite collector lands a new node every run; see `req-samsite-collector-identity`). Multiple historical emissions accumulate on the grid. Future work: a timeline view on the scoreboard showing per-indicator score changes across the last N emissions, with click-through to a specific emission's snapshot.
@@ -268,6 +278,7 @@ Each `compliance_artifact` is per-emission (the samsite collector lands a new no
 ### Future Lift
 ----
 RID: `req-samsite-scoreboard-lift`
+
 Status: `Backlog`
 
 If a second consumer wants the same view (e.g. a fictional Class D system on the grid), the lift path is: promote the panel type to the `fedramp_20x_ksi` plugin as `fedramp-20x-ksi-scoreboard`, move the scoring module there too, and reduce the samsite side to a page-instance-only contribution (matching the ROSCALE/samsite split established by `spec-samsite-compliance-pages-v0.md`). The panel code already has no samsite-specific branching, so the lift is mechanical.
@@ -283,6 +294,7 @@ Per [[panel-latest-emission-fallback-pattern]] and [[future-seam-discipline]], *
 ### Future Migration: tap_web Entity Resolution
 ----
 RID: `req-samsite-scoreboard-entity-resolution-migration`
+
 Status: `Backlog`
 
 The KSI scoreboard is a multi-entity panel (SSP + POA&M roles) that currently resolves its target `compliance_artifact` entities via the locally-defined helpers in `plugins/roscale/panels/_common.py`. When `tap_web/specs/spec-web-panel-entity-resolution-v0.md` lands and the canonical `tap_web/panels/entity_resolution.py` module exists, the scoreboard migrates to import from there.
