@@ -12,6 +12,10 @@ description = "Projection plugin for George's live reproduction of Sam Aydlette'
 # stays profile-explicit (fire-collector order) for auditability and is invisible to
 # the import graph by design (spec req-plugin-arch-dependencies-3, Tier 2).
 depends_on = [
+    { slug = "fedramp_20x_ksi", note = "Seeded by the product record: the FedRAMP 20x KSI story the demo tells." },
+    { slug = "aws_core", note = "Seeded by the product record: the AWS inventory the demo shows." },
+    { slug = "computing_core", note = "Seeded by the product record: the compute vocabulary the demo's grid carries." },
+    { slug = "administrivia", note = "Seeded by the product record: the admin pages the frozen demo shows." },
     { slug = "sigstore_core", note = "compliance_collector imports sigstore verify/decompose helpers + models at import time" },
     { slug = "github_core", note = "imports github_core models/panels for the repo + compliance surfaces at import time" },
     { slug = "roscale", note = "imports the OSCAL workbench panel types the compliance pages consume at import time" },
@@ -45,3 +49,8 @@ aws-collector-schedule = "grift/aws-collector-schedule.grift.json"
 name = "samsite"
 description = "Samsite demo end-to-end: full plugin set git-pinned + population (GRIFT seeds, then boto3/github/KSI/samsite-compliance collectors); required_secrets declared for preflight provisioning."
 sha256 = "6b515e7fa9c94c39ad3cd5ce9edd42a6a0e7760db74df915811458c6f87e2456"
+
+[[boot.records]]
+name = "ci"
+description = "RESERVED NAME (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in — depends_on closure + self, offline, credential-free. The consumer flips self to editable."
+sha256 = "928063d6bc18a5b96b41d1fdc78dd4b29dc1cbb70b5bfba98006c144f31e6bdb"
