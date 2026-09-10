@@ -6,15 +6,15 @@
   "batches": [
     {
       "batch_entity": {
-        "entity_id": "40455f46-60d6-59d1-9ca2-db671ed674eb",
+        "entity_id": "9e3b8b40-9c95-5205-b643-d3f33abd7be2",
         "entity_type": "batch",
-        "name": "Samsite KEV fetch seed v0.1.0",
+        "name": "Samsite KEV fetch seed v0.2.0",
         "dimensions": {}
       },
       "batch_node": {
         "source": "plugins.samsite",
-        "name": "Samsite KEV fetch seed v0.1.0",
-        "description": "Seeds the static end of the CISA KEV fetch story for the samsite board: the CISA web host (cisa.gov) and the KEV catalog web document it serves, joined by HOSTED_BY. Both endpoints are seeded here, so HOSTED_BY is safe at seed time. The dynamic end — the FETCHES edge from the deploy github_workflow to the KEV catalog — is NOT seeded here: the deploy workflow is collector-resolved (its id derives from a GitHub-assigned numeric workflow id, not knowable at authoring time), so the samsite compliance collector emits FETCHES once it resolves the signing workflow. Entity ids are uuid5 over the compliance collector's frozen namespace (node_entity_id/edge_entity_id) so the seed and the collector's FETCHES edge converge on the same kev_catalog node."
+        "name": "Samsite KEV fetch seed v0.2.0",
+        "description": "Seeds the static end of the CISA KEV fetch story for the samsite board: the CISA web host (cisa.gov) and the KEV catalog web document it serves, joined by HOSTS_DOCUMENT (host -> document; computing_core v0.4.0 renamed the former document -> host edge and flipped its direction, so this is seed v0.2.0 under a new batch id — an upgraded grid re-lands it rather than skipping the already-imported v0.1.0 batch). Both endpoints are seeded here, so HOSTS_DOCUMENT is safe at seed time. The dynamic end — the FETCHES_DOCUMENT edge from the deploy github_workflow to the KEV catalog — is NOT seeded here: the deploy workflow is collector-resolved (its id derives from a GitHub-assigned numeric workflow id, not knowable at authoring time), so the samsite compliance collector emits FETCHES_DOCUMENT once it resolves the signing workflow. Entity ids are uuid5 over the compliance collector's frozen namespace (node_entity_id/edge_entity_id) so the seed and the collector's FETCHES_DOCUMENT edge converge on the same kev_catalog node."
       },
       "nodes": [
         {
@@ -54,18 +54,18 @@
       "edges": [
         {
           "entity": {
-            "entity_id": "c332c765-b74d-5442-825b-d917f62da5fc",
+            "entity_id": "31a9940f-8ce1-5c35-84c4-e4e12e5ce920",
             "entity_type": "edge",
-            "name": "CISA KEV Catalog HOSTED_BY CISA",
+            "name": "CISA HOSTS_DOCUMENT CISA KEV Catalog",
             "dimensions": {
               "tap.computing": "network",
               "tap.web": "native"
             }
           },
           "edge": {
-            "from_entity_id": "17f81ef4-4598-55e8-b145-c61bd859e299",
-            "to_entity_id": "36077809-9276-593f-b97f-e6953663f201",
-            "edge_type": "HOSTED_BY__computing_core",
+            "from_entity_id": "36077809-9276-593f-b97f-e6953663f201",
+            "to_entity_id": "17f81ef4-4598-55e8-b145-c61bd859e299",
+            "edge_type": "HOSTS_DOCUMENT__computing_core",
             "properties": {}
           }
         }

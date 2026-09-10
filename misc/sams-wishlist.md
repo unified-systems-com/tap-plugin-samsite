@@ -130,7 +130,7 @@ Drawn from the data we have on the grid right now, runnable with bare-MATCH
 3. **Sam's claimed signing identity matches reality.** `MATCH (s:ksi_signal) WHERE s.signed_by != s.provenance_builder_id` — drift between what the workflow URI says and what the cert says it signed.
 4. **No N4/N5 internet-reachable findings past SLA.** `MATCH (f:vdr_finding) WHERE f.pain IN ["N4","N5"] AND f.internet_reachable AND f.current_disposition = "open" AND f.remediation_due_at < now()` — one Gryphon query, runs against current grid state.
 5. **Every CloudFront distribution has OAC.** `MATCH (d:aws_cloudfront_distribution) WHERE d.configuration.origin_access_control IS empty` — the earlier OAC collection gap is now plug-and-go.
-6. **EventBridge rule → Lambda invocations have least-privilege roles.** Walk the `INVOKES` edge to the Lambda, walk its IAM role, check the policy. Multi-hop. The kind of thing Sam can't easily write.
+6. **EventBridge rule → Lambda invocations have least-privilege roles.** Walk the `INVOKES_LAMBDA` edge to the Lambda, walk its IAM role, check the policy. Multi-hop. The kind of thing Sam can't easily write.
 7. **VDR-attested source tools all reporting.** `MATCH (f:vdr_finding)` → DISTINCT source → assert `{opa, checkov, tfsec, dependabot} ⊆ observed`. If Dependabot disappeared, we'd know.
 8. **Sigstore-verified.** All `signature_verified = True`. Trivial; high signal as a "system green" boolean.
 

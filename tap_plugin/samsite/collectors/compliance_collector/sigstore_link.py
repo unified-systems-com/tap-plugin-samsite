@@ -121,7 +121,7 @@ def oidc_issuer_node_envelope(issuer_url: str) -> dict[str, Any]:
     """Build the ``oidc_issuer`` node envelope for ``issuer_url``.
 
     The consumer ensures this node exists in its own batch so the rekor entry's
-    hotlinked ``IDENTITY_VOUCHED_BY`` edge has a valid, present target regardless
+    hotlinked ``IDENTITY_VOUCHED_BY_ISSUER`` edge has a valid, present target regardless
     of whether any other observer has run. Delegates to identity_core's general-
     case helper so the node payload is byte-identical to what github's collector
     mints — a prerequisite for the two to merge cleanly by deterministic id."""
@@ -135,7 +135,7 @@ def verification_dict(result: Any) -> dict[str, Any]:
     the artifact decompose functions still consume (back-compat field stamping).
 
     Kept while the artifact nodes carry their own signature fields; the
-    canonical verdict now lives on the ``ATTESTED_BY`` edge (single-source
+    canonical verdict now lives on the ``ATTESTED_BY_LOG_ENTRY`` edge (single-source
     consolidation is a follow-up — see the collector spec).
     """
     return {

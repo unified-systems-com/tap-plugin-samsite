@@ -34,9 +34,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-computing-core",
-          "rev": "v0.3.0"
+          "rev": "v0.4.0"
         },
-        "note": "Package-mode (tap_plugin.computing_core). Vendor-neutral computing-primitive dimension; seeded in population. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+        "note": "Package-mode (tap_plugin.computing_core). Vendor-neutral computing-primitive dimension; seeded in population. v0.4.0 carries the HOSTS_DOCUMENT (flipped) / FETCHES_DOCUMENT edge renames samsite's KEV seed + collector emit. Git-sourced from its own repo at v0.4.0 (public repo since 2026-08-08; anonymous git-install)."
       },
       {
         "slug": "roscale",
@@ -64,9 +64,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-aws-core",
-          "rev": "v0.4.1"
+          "rev": "v0.5.0"
         },
-        "note": "Package-mode (tap_plugin.aws_core). Tier-0 boto3 dep. AWS dimension + region reference data; seeded + fired in population. Git-sourced from its own repo at v0.4.0 (public repo since 2026-08-08; anonymous git-install)."
+        "note": "Package-mode (tap_plugin.aws_core). Tier-0 boto3 dep. AWS dimension + region reference data; seeded + fired in population. v0.5.0 carries the INVOKES_LAMBDA / FEDERATES_INTO_ROLE / ENCRYPTED_WITH_KEY / AUTHENTICATES_VIA_USER_POOL edge renames. Git-sourced from its own repo at v0.5.0 (public repo since 2026-08-08; anonymous git-install)."
       },
       {
         "slug": "sigstore_core",
@@ -74,9 +74,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-sigstore-core",
-          "rev": "v0.3.0"
+          "rev": "v0.4.0"
         },
-        "note": "Package-mode (tap_plugin.sigstore_core). Tier-0 sigstore dep. Install-only library: samsite compliance_collector consumes its verify/decompose helpers + models; IDENTITY_VOUCHED_BY targets identity_core__oidc_issuer. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
+        "note": "Package-mode (tap_plugin.sigstore_core). Tier-0 sigstore dep. Install-only library: samsite compliance_collector consumes its verify/decompose helpers + models; IDENTITY_VOUCHED_BY_ISSUER targets identity_core__oidc_issuer. v0.4.0 carries the ATTESTED_BY_LOG_ENTRY / CERT_ISSUED_BY_CA / IDENTITY_VOUCHED_BY_ISSUER edge renames the landing projection queries. Git-sourced from its own repo at v0.4.0 (public repo since 2026-08-08; anonymous git-install)."
       },
       {
         "slug": "github_core",
@@ -94,9 +94,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-compliance-core",
-          "rev": "v0.2.1"
+          "rev": "v0.3.0"
         },
-        "note": "Package-mode (tap_plugin.compliance_core). Install-only substrate: regime-agnostic compliance vocabulary (artifact/context/evidence/finding/exception/boundary). samsite's compliance_collector creates compliance_core__compliance_artifact nodes; fedramp_20x_ksi depends on it. No GRIFT population seed. Git-sourced from its own repo at v0.2.0 (public repo since 2026-08-08; anonymous git-install)."
+        "note": "Package-mode (tap_plugin.compliance_core). Install-only substrate: regime-agnostic compliance vocabulary (artifact/context/evidence/finding/exception/boundary). samsite's compliance_collector creates compliance_core__compliance_artifact nodes; fedramp_20x_ksi depends on it. v0.3.0 carries the CITES_COMPLIANCE_EVIDENCE / CARRIES_COMPLIANCE_FINDING edge renames. No GRIFT population seed. Git-sourced from its own repo at v0.3.0 (public repo since 2026-08-08; anonymous git-install)."
       },
       {
         "slug": "fedramp_20x_ksi",
