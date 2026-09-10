@@ -34,17 +34,21 @@ dynamic = ["version"]
 # compliance_collector references their ENTITY TYPES by string (fedramp KSI catalog nodes
 # in decompose.py/grift; computing_core types in kev_process.py), so both must be INSTALLED
 # — declared here per the 2026-07-07 audit (fedramp stays for now, extraction later).
-# Unversioned: monorepo editable installs report the 0.0.0 hatch-vcs fallback, so a lower
-# bound would not resolve; version pinning arrives with the index-publish work (Tier-0
-# uv-resolution model, still under discussion).
+# Mostly unversioned: monorepo editable installs report the 0.0.0 hatch-vcs fallback, so a
+# lower bound would not resolve there; version pinning arrives with the index-publish work
+# (Tier-0 uv-resolution model, still under discussion). The FOUR plugins whose edge slugs
+# samsite queries or emits by name ARE bounded (same shape as github_core's git-core-tap
+# bound): each lower bound is the release carrying that plugin's req-tap-plugin-edge-naming
+# rename (samsite issues #7-#10), because a samsite on the old slug beside the renamed plugin
+# reads NOTHING — the plugin's migration deleted the old rows — and nothing crashes to say so.
 dependencies = [
-    "tap-plugin-aws-core",
-    "tap-plugin-sigstore-core",
+    "tap-plugin-aws-core>=0.5.0,<0.6",
+    "tap-plugin-sigstore-core>=0.4.0,<0.5",
     "tap-plugin-github-core",
     "tap-plugin-roscale",
     "tap-plugin-fedramp-20x-ksi",
-    "tap-plugin-computing-core",
-    "tap-plugin-compliance-core",
+    "tap-plugin-computing-core>=0.4.0,<0.5",
+    "tap-plugin-compliance-core>=0.3.0,<0.4",
     "tap-plugin-identity-core",
 ]
 

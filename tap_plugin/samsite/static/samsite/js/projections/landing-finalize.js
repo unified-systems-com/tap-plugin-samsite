@@ -59,8 +59,8 @@ const NESTING_RELATIONSHIPS = [
     {name: "platform-hosts-account",    gryphon: "(parent:github_core__github_platform)-[:HOSTS_ACCOUNT__github_core]->(child:github_core__github_account)"},
     {name: "account-owns-repo",         gryphon: "(parent:github_core__github_account)-[:OWNS_REPO__github_core]->(child:github_core__github_repository)"},
     {name: "repo-defines-workflow",     gryphon: "(parent:github_core__github_repository)-[:DEFINES_WORKFLOW__github_core]->(child:github_core__github_workflow)"},
-    {name: "ca-contains-entries",       gryphon: "(parent:sigstore_core__sigstore_ca)<-[:CERT_ISSUED_BY__sigstore_core]-(child:sigstore_core__rekor_log_entry)"},
-    {name: "host-hosts-document",       gryphon: "(parent:computing_core__web_host)<-[:HOSTED_BY__computing_core]-(child:computing_core__web_document)"},
+    {name: "ca-contains-entries",       gryphon: "(parent:sigstore_core__sigstore_ca)<-[:CERT_ISSUED_BY_CA__sigstore_core]-(child:sigstore_core__rekor_log_entry)"},
+    {name: "host-hosts-document",       gryphon: "(parent:computing_core__web_host)-[:HOSTS_DOCUMENT__computing_core]->(child:computing_core__web_document)"},
     // github_app (Dependabot) is enabled on the repo (ENABLED_ON) but belongs at
     // the github.com PLATFORM level, not inside the repo box. The nesting resolver
     // is single-hop and there's no app→platform edge, so it's parented to the
@@ -273,8 +273,8 @@ export async function execute(context) {
     //    representative is already a child of the sigstore_ca compound; the depth
     //    cards join the same box and it auto-sizes around the compact pile instead
     //    of a wide row. The count chip carries the true count; members'
-    //    SIGNED_BY_IDENTITY / IDENTITY_VOUCHED_BY edges dedup onto the
-    //    representative and the files' ATTESTED_BY edges re-point onto it.
+    //    SIGNED_BY_IDENTITY / IDENTITY_VOUCHED_BY_ISSUER edges dedup onto the
+    //    representative and the files' ATTESTED_BY_LOG_ENTRY edges re-point onto it.
     //    Positioned at the Sigstore slot (top-right, centered above the GitHub set).
     if (rekor.nonempty()) {
         // direction defaults to "auto" — the projection runtime resolves it in
@@ -370,7 +370,7 @@ export async function execute(context) {
     }
 
     // 10. Z-order (verified against the cytoscape renderer's z-sort cache): the
-    //     IDENTITY_VOUCHED_BY edges run from the Rekor entries down to the OIDC issuer,
+    //     IDENTITY_VOUCHED_BY_ISSUER edges run from the Rekor entries down to the OIDC issuer,
     //     crossing the notgeorge account + repo boxes. We want them BEHIND those
     //     (filled) boxes but still visible connecting to the issuer over the github.com
     //     fill. Cytoscape z-order works in z-compound-depth GROUPS (bottom < auto < top);
@@ -382,6 +382,6 @@ export async function execute(context) {
     //     both makes z-index strict, so the edge (z 1) draws above the platform box
     //     (z 0) — issuer connection visible — while the account/repo "auto" group still
     //     floats above and occludes it. account/repo untouched. (Edge label = type.)
-    cy.edges('[label="IDENTITY_VOUCHED_BY__sigstore_core"]').style({"z-compound-depth": "bottom", "z-index": 1, "z-index-compare": "manual"});
+    cy.edges('[label="IDENTITY_VOUCHED_BY_ISSUER__sigstore_core"]').style({"z-compound-depth": "bottom", "z-index": 1, "z-index-compare": "manual"});
     cy.nodes('[entity_type="github_core__github_platform"]').style({"z-compound-depth": "bottom", "z-index": 0, "z-index-compare": "manual"});
 }

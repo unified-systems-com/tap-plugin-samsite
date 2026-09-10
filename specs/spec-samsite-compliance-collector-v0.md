@@ -46,7 +46,7 @@ collector is its first proving instance.
 | req-samsite-collector-schedule | [Daily Schedule](#daily-schedule) | Proposed | Registered to run daily through the `tap_cares` scheduler |
 | req-samsite-collector-identity | [Identity And Emission History](#identity-and-emission-history) | Proposed | Components dedup across emissions; signals/reports/findings per-emission |
 | req-samsite-collector-boundary-membership | [Authorization Boundary Membership (v0 KLUDGE)](#authorization-boundary-membership-v0-kludge) | Proposed | **KLUDGE** — blanket-scope every `aws_account` into the samsite boundary; replace with curated membership |
-| req-samsite-collector-kev-fetch | [CISA KEV Fetch Process](#cisa-kev-fetch-process) | Proposed | Collector emits `FETCHES` (deploy workflow → seeded KEV catalog); host/doc/`HOSTED_BY` seeded statically |
+| req-samsite-collector-kev-fetch | [CISA KEV Fetch Process](#cisa-kev-fetch-process) | Proposed | Collector emits `FETCHES_DOCUMENT` (deploy workflow → seeded KEV catalog); host/doc/`HOSTS_DOCUMENT` seeded statically |
 | req-samsite-collector-nongoals | [v0 Non-Goals](#v0-non-goals) | Proposed | Generic web collector archetype, deferred |
 
 ---
@@ -114,15 +114,15 @@ plugin became sigstore_core's first consumer; see `req-sigstore-core-verify-8`).
 
 Each verified bundle is decomposed via `sigstore_core.decompose.bundle_to_grift_fragment`
 into the transparency-log graph — a `rekor_log_entry` node, a `sigstore_ca`
-upsert, and `ATTESTED_BY` / `CERT_ISSUED_BY` edges — merged into the same
+upsert, and `ATTESTED_BY_LOG_ENTRY` / `CERT_ISSUED_BY_CA` edges — merged into the same
 batch. The collector resolves the signing `github_workflow` from the cert SAN
 (`(full_name, path)` via a Gryphon read, `sigstore_link.resolve_workflow_entity_id`)
 and, on a single match, supplies it so a `SIGNED_BY_IDENTITY` edge is emitted.
 It also ensures the `oidc_issuer` convergence node (github_core-owned) is in
-the batch and supplies its id so the hotlinked `IDENTITY_VOUCHED_BY` edge has a
+the batch and supplies its id so the hotlinked `IDENTITY_VOUCHED_BY_ISSUER` edge has a
 present target — the rekor entry's `signing_identity_issuer` field and that
 edge are validated together in the one batch (deferred hotlink consistency).
-The verification verdict is the absolute fact on the `ATTESTED_BY` edge per
+The verification verdict is the absolute fact on the `ATTESTED_BY_LOG_ENTRY` edge per
 `req-sigstore-core-disclosure`. (The artifact nodes retain their own
 `signature_verified` / `signed_by` / `rekor_log_index` fields for now; folding
 them onto the edge as the single source of truth is a follow-up that also
@@ -131,7 +131,7 @@ touches the consumer disclosure panels.)
 A failed or unverifiable signature is recorded as `signature_verified =
 false`/`null` — never silently dropped — and does not abort the run; an
 unverified artifact is still collected, flagged, and (when the bundle parsed)
-still emits its `ATTESTED_BY` edge with the false verdict.
+still emits its `ATTESTED_BY_LOG_ENTRY` edge with the false verdict.
 
 **Scope line.** v0 verification is *bounded evaluation* — signature checking,
 Rekor inclusion-proof checking, JSON-Schema validation, parsing. It does not
@@ -145,7 +145,7 @@ sandbox/satellite concern and is out of scope.
 | req-samsite-collector-verify-1 | Bundles Verified | Implemented | Each artifact is verified against its `.bundle` via `sigstore_core.verify_bundle` (not `sigstore.*` directly); the result is recorded. | |
 | req-samsite-collector-verify-2 | Failure Is Visible, Not Fatal | Implemented | A failed/unverifiable signature is recorded as such; the artifact still collects; the run does not abort. | |
 | req-samsite-collector-verify-3 | Bounded Evaluation Only | Implemented | v0 verification is signature/proof/schema checking and parsing — never executing fetched content as code. | |
-| req-samsite-collector-verify-4 | Signature Graph Emitted | Implemented | Each verified bundle is decomposed via `sigstore_core.bundle_to_grift_fragment` into a `rekor_log_entry` + `sigstore_ca` + `ATTESTED_BY`/`CERT_ISSUED_BY`, merged into the batch; `SIGNED_BY_IDENTITY` is added when the signing `github_workflow` resolves to a single node via Gryphon; the `oidc_issuer` node is ensured in-batch and the hotlinked `IDENTITY_VOUCHED_BY` edge emitted. | Cross-plugin workflow *read* + oidc_issuer ensure-exists are the consumer's job per `req-sigstore-core-edges-5`/`-7`. |
+| req-samsite-collector-verify-4 | Signature Graph Emitted | Implemented | Each verified bundle is decomposed via `sigstore_core.bundle_to_grift_fragment` into a `rekor_log_entry` + `sigstore_ca` + `ATTESTED_BY_LOG_ENTRY`/`CERT_ISSUED_BY_CA`, merged into the batch; `SIGNED_BY_IDENTITY` is added when the signing `github_workflow` resolves to a single node via Gryphon; the `oidc_issuer` node is ensured in-batch and the hotlinked `IDENTITY_VOUCHED_BY_ISSUER` edge emitted. | Cross-plugin workflow *read* + oidc_issuer ensure-exists are the consumer's job per `req-sigstore-core-edges-5`/`-7`. |
 
 ### Decomposition
 ----
@@ -295,21 +295,22 @@ static end and a collector-resolved dynamic end.
 The story is three nodes and two edges:
 
 ```
-github_workflow (deploy) ─FETCHES─▶ web_document (CISA KEV catalog) ─HOSTED_BY─▶ web_host (CISA)
+github_workflow (deploy) ─FETCHES_DOCUMENT─▶ web_document (CISA KEV catalog) ◀─HOSTS_DOCUMENT─ web_host (CISA)
 ```
 
 - **Static end (seed).** `grift/kev-fetch.grift.json` seeds the `web_host`
-  (`cisa.gov`), the `web_document` (the KEV catalog URL), and the `HOSTED_BY`
-  edge between them. Both endpoints are seeded together, so `HOSTED_BY` is
-  always safe. The two nodes use `computing_core`'s web-native types and carry
+  (`cisa.gov`), the `web_document` (the KEV catalog URL), and the `HOSTS_DOCUMENT`
+  edge from host to document (computing_core v0.4.0 renamed the former document → host
+  edge and flipped its direction). Both endpoints are seeded together, so `HOSTS_DOCUMENT`
+  is always safe. The two nodes use `computing_core`'s web-native types and carry
   the `tap.web: native` marker. Ids are `uuid5` over the compliance collector's
   frozen namespace (`node_entity_id`/`edge_entity_id`), so the seed and the
   collector agree on the catalog's identity.
-- **Dynamic end (collector).** The `FETCHES` edge cannot be seeded: the deploy
+- **Dynamic end (collector).** The `FETCHES_DOCUMENT` edge cannot be seeded: the deploy
   `github_workflow`'s id derives from a GitHub-assigned numeric workflow id,
   unknowable at authoring time. The signer of every `/.well-known/` artifact is
   the deploy workflow, so the collector captures the workflow it already
-  resolves for `SIGNED_BY_IDENTITY` and, in a dedicated phase, emits `FETCHES`
+  resolves for `SIGNED_BY_IDENTITY` and, in a dedicated phase, emits `FETCHES_DOCUMENT`
   from it to the seeded KEV catalog. Both ends are *resolved, never minted*: if
   the signing workflow didn't resolve, or the catalog isn't on the grid, the
   edge is omitted rather than dangled.
@@ -321,10 +322,10 @@ github_workflow (deploy) ─FETCHES─▶ web_document (CISA KEV catalog) ─HOS
 
 | ACID | Title | Status | Description | Notes |
 | --- | --- | :---: | --- | --- |
-| req-samsite-collector-kev-fetch-1 | Static Nodes Seeded | Proposed | The CISA `web_host`, the KEV `web_document`, and their `HOSTED_BY` edge are seeded by `kev-fetch.grift.json`. | |
-| req-samsite-collector-kev-fetch-2 | FETCHES From Deploy Workflow | Proposed | The collector emits a `FETCHES` edge from the resolved deploy `github_workflow` to the seeded KEV catalog. | Reuses the `SIGNED_BY_IDENTITY` workflow resolution. |
-| req-samsite-collector-kev-fetch-3 | Resolved Not Minted | Proposed | The collector resolves both edge endpoints; it never mints the KEV catalog node. `FETCHES` is omitted (not dangled) when either endpoint is absent. | Mirrors `SIGNED_BY_IDENTITY` / boundary-membership graceful degradation. |
-| req-samsite-collector-kev-fetch-4 | Idempotent | Proposed | The `FETCHES` edge id is deterministic (`uuid5` over `FETCHES:<workflow>-><catalog>`); re-runs upsert rather than duplicate. | |
+| req-samsite-collector-kev-fetch-1 | Static Nodes Seeded | Proposed | The CISA `web_host`, the KEV `web_document`, and their `HOSTS_DOCUMENT` edge (host → document) are seeded by `kev-fetch.grift.json`. | |
+| req-samsite-collector-kev-fetch-2 | FETCHES_DOCUMENT From Deploy Workflow | Proposed | The collector emits a `FETCHES_DOCUMENT` edge from the resolved deploy `github_workflow` to the seeded KEV catalog. | Reuses the `SIGNED_BY_IDENTITY` workflow resolution. |
+| req-samsite-collector-kev-fetch-3 | Resolved Not Minted | Proposed | The collector resolves both edge endpoints; it never mints the KEV catalog node. `FETCHES_DOCUMENT` is omitted (not dangled) when either endpoint is absent. | Mirrors `SIGNED_BY_IDENTITY` / boundary-membership graceful degradation. |
+| req-samsite-collector-kev-fetch-4 | Idempotent | Proposed | The `FETCHES_DOCUMENT` edge id is deterministic (`uuid5` over `edge:FETCHES_DOCUMENT__computing_core:<workflow>-><catalog>`); re-runs upsert rather than duplicate. | |
 
 ### v0 Non-Goals
 ----

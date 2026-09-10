@@ -373,7 +373,7 @@
           },
           "node": {
             "name": "samsite-compliance-eventbridge-invokes-lambda",
-            "description": "Places the compliance Lambda directly to the right of the EventBridge rule — INVOKES, the scheduled trigger that fires the Lambda. Puts EventBridge, Lambda, and the CloudWatch log group on a single horizontal line so the compliance flow reads left-to-right.",
+            "description": "Places the compliance Lambda directly to the right of the EventBridge rule — INVOKES_LAMBDA, the scheduled trigger that fires the Lambda. Puts EventBridge, Lambda, and the CloudWatch log group on a single horizontal line so the compliance flow reads left-to-right.",
             "definition": {
               "anchor": {
                 "gryphon": "MATCH (n:aws_core__aws_eventbridge_rule) WHERE n.data.tags.Project = \"samsite\" AND n.data.tags.Component = \"compliance\""

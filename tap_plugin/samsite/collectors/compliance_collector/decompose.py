@@ -39,7 +39,7 @@ class DecomposedArtifact:
     nodes: list[dict[str, Any]] = field(default_factory=list)
     edges: list[dict[str, Any]] = field(default_factory=list)
     # Entity id of the root artifact node (the ksi_signal / vdr_report /
-    # compliance_artifact). The signed entity that sigstore_core's ATTESTED_BY
+    # compliance_artifact). The signed entity that sigstore_core's ATTESTED_BY_LOG_ENTRY
     # edge hangs off — set by each decompose so the collector can wire the
     # signature graph without re-deriving the natural key.
     anchor_entity_id: str = ""

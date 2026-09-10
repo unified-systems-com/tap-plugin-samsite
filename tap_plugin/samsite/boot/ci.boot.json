@@ -29,9 +29,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-compliance-core",
-          "rev": "v0.2.2"
+          "rev": "v0.3.0"
         },
-        "note": "Declared in depends_on. Pinned at v0.2.2, the release current on 2026-09-09. Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
+        "note": "Declared in depends_on. Pinned at v0.3.0, the release current on 2026-09-09 (carries the req-tap-plugin-edge-naming edge renames samsite retargets). Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
       },
       {
         "slug": "sigstore_core",
@@ -39,9 +39,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-sigstore-core",
-          "rev": "v0.3.1"
+          "rev": "v0.4.0"
         },
-        "note": "Declared in depends_on. Pinned at v0.3.1, the release current on 2026-09-09. Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
+        "note": "Declared in depends_on. Pinned at v0.4.0, the release current on 2026-09-09 (carries the req-tap-plugin-edge-naming edge renames samsite retargets). Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
       },
       {
         "slug": "roscale",
@@ -59,9 +59,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-computing-core",
-          "rev": "v0.3.1"
+          "rev": "v0.4.0"
         },
-        "note": "Declared in depends_on. Pinned at v0.3.1, the release current on 2026-09-09. Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
+        "note": "Declared in depends_on. Pinned at v0.4.0, the release current on 2026-09-09 (carries the req-tap-plugin-edge-naming edge renames samsite retargets). Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
       },
       {
         "slug": "aws_core",
@@ -69,9 +69,9 @@
         "source": {
           "type": "git",
           "url": "https://github.com/unified-systems-com/tap-plugin-aws-core",
-          "rev": "v0.4.2"
+          "rev": "v0.5.0"
         },
-        "note": "Declared in depends_on. Pinned at v0.4.2, the release current on 2026-09-09. Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
+        "note": "Declared in depends_on. Pinned at v0.5.0, the release current on 2026-09-09 (carries the req-tap-plugin-edge-naming edge renames samsite retargets). Public repo, no credential (req-tap-plugin-arch-source-secret-5)."
       },
       {
         "slug": "administrivia",

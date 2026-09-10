@@ -1,9 +1,9 @@
 """The CISA KEV fetch process: the deploy workflow → KEV catalog edge.
 
 The static end of this story — the CISA ``web_host`` and the KEV catalog
-``web_document``, joined by ``HOSTED_BY`` — is seeded by
+``web_document``, joined by ``HOSTS_DOCUMENT`` (host → document) — is seeded by
 ``grift/kev-fetch.grift.json``. This module owns the dynamic end: the
-``FETCHES`` edge from the deploy ``github_workflow`` (the signer of every
+``FETCHES_DOCUMENT`` edge from the deploy ``github_workflow`` (the signer of every
 ``/.well-known/`` artifact) to that seeded KEV catalog.
 
 The edge can't be seeded statically because the deploy workflow's entity id
@@ -12,7 +12,7 @@ time. So, exactly like the Sigstore ``SIGNED_BY_IDENTITY`` edge, the collector
 resolves the workflow via Gryphon and emits the edge only when it resolves —
 graceful (omitted) otherwise. The KEV catalog target is resolved (not minted)
 here too: the seed owns that node, so the collector never creates it; if the
-seed has not run, ``FETCHES`` is omitted rather than dangling.
+seed has not run, ``FETCHES_DOCUMENT`` is omitted rather than dangling.
 
 Spec: plugins/samsite/specs/spec-samsite-compliance-collector-v0.md
 (req-samsite-collector-kev-fetch).
@@ -29,7 +29,7 @@ from .identity import edge_entity_id
 #: this module resolves the same node by url, so the two converge.
 KEV_CATALOG_URL: Final[str] = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 
-_FETCHES_DIMENSIONS: Final[dict[str, str]] = {"tap.computing": "network", "tap.web": "native"}
+_FETCHES_DOCUMENT_DIMENSIONS: Final[dict[str, str]] = {"tap.computing": "network", "tap.web": "native"}
 
 
 def resolve_kev_catalog_entity_id() -> str | None:
@@ -37,7 +37,7 @@ def resolve_kev_catalog_entity_id() -> str | None:
 
     A content match on ``url`` via Gryphon (mirrors ``sigstore_link``'s workflow
     resolver). Zero or multiple matches return ``None``, so the caller omits the
-    ``FETCHES`` edge rather than guess or dangle.
+    ``FETCHES_DOCUMENT`` edge rather than guess or dangle.
     """
     from tap_grid.models import Search
     from tap_grid.search import execute_search
@@ -69,19 +69,19 @@ def resolve_kev_catalog_entity_id() -> str | None:
 
 
 def fetches_edge_envelope(deploy_workflow_entity_id: str, kev_catalog_entity_id: str) -> dict[str, Any]:
-    """Build the ``FETCHES`` edge envelope: deploy workflow → KEV catalog."""
-    edge_id = str(edge_entity_id("FETCHES__computing_core", deploy_workflow_entity_id, kev_catalog_entity_id))
+    """Build the ``FETCHES_DOCUMENT`` edge envelope: deploy workflow → KEV catalog."""
+    edge_id = str(edge_entity_id("FETCHES_DOCUMENT__computing_core", deploy_workflow_entity_id, kev_catalog_entity_id))
     return {
         "entity": {
             "entity_id": edge_id,
             "entity_type": "edge",
-            "name": "Deploy workflow FETCHES CISA KEV Catalog",
-            "dimensions": dict(_FETCHES_DIMENSIONS),
+            "name": "Deploy workflow FETCHES_DOCUMENT CISA KEV Catalog",
+            "dimensions": dict(_FETCHES_DOCUMENT_DIMENSIONS),
         },
         "edge": {
             "from_entity_id": deploy_workflow_entity_id,
             "to_entity_id": kev_catalog_entity_id,
-            "edge_type": "FETCHES__computing_core",
+            "edge_type": "FETCHES_DOCUMENT__computing_core",
             "properties": {},
         },
     }

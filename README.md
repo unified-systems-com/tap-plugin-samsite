@@ -15,7 +15,7 @@ every signed compliance artifact, and CISA's Known Exploited Vulnerabilities
 catalog — on the same graph as the inventory it applies to.
 
 The edges are typed facts, not arrows: `ROUTES_TRAFFIC`, `ASSUMES_ROLE`,
-`ATTESTED_BY`, `FEDERATES_VIA`. "What talks to what, and who vouches for it" becomes
+`ATTESTED_BY_LOG_ENTRY`, `FEDERATES_VIA`. "What talks to what, and who vouches for it" becomes
 a query you can run, not an interview you have to schedule.
 
 Samsite is TAP's reference assessment target: a real, deployed website whose AWS

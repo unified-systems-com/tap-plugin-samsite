@@ -99,7 +99,7 @@ class SamsiteComplianceCollector(CollectorBase):
         """Merge one artifact's sigstore_core signature graph into the batch.
 
         Turns the verified bundle into a ``rekor_log_entry`` + ``sigstore_ca``
-        upsert + ``CERT_ISSUED_BY``/``ATTESTED_BY`` (and ``SIGNED_BY_IDENTITY``
+        upsert + ``CERT_ISSUED_BY_CA``/``ATTESTED_BY_LOG_ENTRY`` (and ``SIGNED_BY_IDENTITY``
         when the signing workflow resolves to a single ``github_workflow``).
         No-op when no bundle came back or it was unparseable. The shared
         ``sigstore_ca`` node repeats across artifacts, so it's deduped by id.
@@ -111,13 +111,13 @@ class SamsiteComplianceCollector(CollectorBase):
         workflow_id = sigstore_link.resolve_workflow_entity_id(full_name, workflow_path) if full_name else None
 
         # The workflow that signs the /.well-known/ artifacts IS the deploy
-        # workflow; capture it (first resolved wins) for the KEV FETCHES edge in
+        # workflow; capture it (first resolved wins) for the KEV FETCHES_DOCUMENT edge in
         # Phase 2.6.
         if workflow_id is not None and self._deploy_workflow_id is None:
             self._deploy_workflow_id = workflow_id
 
         # OIDC issuer convergence node. Ensure it exists in this batch (deduped)
-        # so the hotlinked IDENTITY_VOUCHED_BY edge has a present target; supply
+        # so the hotlinked IDENTITY_VOUCHED_BY_ISSUER edge has a present target; supply
         # its id to the decompose helper, which emits the edge.
         issuer_entity_id: str | None = None
         issuer_url = (result.signing_issuer or "").strip()
@@ -188,7 +188,7 @@ class SamsiteComplianceCollector(CollectorBase):
         self.record_info(_SITE_RUN_STARTED, "RUN_STARTED", "Samsite compliance collection started.")
         fetched_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         # Set by _emit_signature_graph when the signing (= deploy) workflow
-        # resolves; consumed by the Phase 2.6 KEV FETCHES edge.
+        # resolves; consumed by the Phase 2.6 KEV FETCHES_DOCUMENT edge.
         self._deploy_workflow_id: str | None = None
 
         try:
@@ -200,7 +200,7 @@ class SamsiteComplianceCollector(CollectorBase):
         artifacts = manifest["artifacts"]
         verification_policy = manifest["verification"]
         # One policy for the whole run — verify_bundle enforces it and
-        # bundle_to_grift_fragment records it on the ATTESTED_BY edge.
+        # bundle_to_grift_fragment records it on the ATTESTED_BY_LOG_ENTRY edge.
         policy = GitHubWorkflowPolicy(
             oidc_issuer=verification_policy["oidc_issuer"],
             github_repository=verification_policy["github_repository"],
@@ -389,11 +389,11 @@ class SamsiteComplianceCollector(CollectorBase):
         # ---- Phase 2.6: CISA KEV fetch process edge -------------------------
         # The deploy workflow (signer of every /.well-known/ artifact) fetches
         # the CISA KEV catalog each run as the VDR gate input. The CISA host +
-        # KEV catalog nodes and their HOSTED_BY edge are seeded statically
-        # (kev-fetch.grift.json); here we add the FETCHES edge from the resolved
+        # KEV catalog nodes and their HOSTS_DOCUMENT edge are seeded statically
+        # (kev-fetch.grift.json); here we add the FETCHES_DOCUMENT edge from the resolved
         # deploy workflow to the seeded catalog. Both ends are resolved, never
         # minted: if the signing workflow didn't resolve, or the catalog wasn't
-        # seeded, FETCHES is omitted (graceful, mirroring SIGNED_BY_IDENTITY and
+        # seeded, FETCHES_DOCUMENT is omitted (graceful, mirroring SIGNED_BY_IDENTITY and
         # the boundary-membership phase) rather than left dangling.
         if self._deploy_workflow_id is not None:
             kev_catalog_id = kev_process.resolve_kev_catalog_entity_id()
@@ -402,7 +402,7 @@ class SamsiteComplianceCollector(CollectorBase):
                 self.record_info(
                     _SITE_KEV_FETCH_EDGE,
                     "KEV_FETCH_EDGE",
-                    "FETCHES edge added: deploy workflow -> CISA KEV catalog.",
+                    "FETCHES_DOCUMENT edge added: deploy workflow -> CISA KEV catalog.",
                     message_data={"deploy_workflow": self._deploy_workflow_id, "kev_catalog": kev_catalog_id},
                 )
             else:
@@ -410,13 +410,13 @@ class SamsiteComplianceCollector(CollectorBase):
                     _SITE_KEV_FETCH_SKIPPED,
                     "KEV_FETCH_NO_CATALOG",
                     "Deploy workflow resolved but the CISA KEV catalog node is not on the grid "
-                    "(kev-fetch.grift.json not seeded?); FETCHES omitted.",
+                    "(kev-fetch.grift.json not seeded?); FETCHES_DOCUMENT omitted.",
                 )
         else:
             self.record_info(
                 _SITE_KEV_FETCH_SKIPPED,
                 "KEV_FETCH_NO_WORKFLOW",
-                "No deploy workflow resolved from artifact signatures; KEV FETCHES edge omitted.",
+                "No deploy workflow resolved from artifact signatures; KEV FETCHES_DOCUMENT edge omitted.",
             )
 
         # ---- Phase 3: assemble + submit -------------------------------------
